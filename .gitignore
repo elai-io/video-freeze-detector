@@ -157,7 +157,7 @@ output_diffs/
 *~
 
 # IDE specific
-.vscode/settings.json
+.vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
