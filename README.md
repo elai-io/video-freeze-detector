@@ -1,6 +1,6 @@
 # Video Freeze Detection System
 
-[![Version](https://img.shields.io/badge/version-0.1.1-blue.svg)](https://github.com/elai-io/video-freeze-detector/releases/tag/v0.1.1)
+[![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)](https://github.com/elai-io/video-freeze-detector/releases/tag/v0.1.2)
 
 A robust system for detecting video freezes in synchronized multi-camera recordings using edge-based frame difference analysis.
 
@@ -51,7 +51,7 @@ VideoFreezeDetector/
 ## 🧠 How It Works
 
 - **Edge-based analysis:** Uses Canny edge detection to preprocess frames, making freeze detection robust to noise and lighting changes.
-- **Metric:** The main metric is `edge_velocity_min_ratio` (minimum edge difference divided by mean edge difference across cameras), which achieved 85.7% accuracy on known freeze frames.
+- **Metric:** The main metric is `edge_velocity_min_ratio` (minimum edge difference divided by maximum edge difference across cameras), which achieved 85.7% accuracy on known freeze frames and better detects partial freezes.
 - **Visualization:** For each detected freeze, the system saves three images: previous frame, current frame, and their edge difference (center region, all cameras side-by-side).
 - **Modular architecture:** All core logic is in the `modules/` folder for easy extension and testing.
 

@@ -7,6 +7,7 @@ from numpy.typing import NDArray
 class FreezeDetectorEdge:
     """
     Freeze detector using edge_velocity_min_ratio - the best performing metric (85.7% accuracy)
+    Uses min/max ratio for better partial freeze detection
     """
     
     def __init__(self, frame_differences: List[List[float]], 
@@ -40,12 +41,13 @@ class FreezeDetectorEdge:
             edge_velocities = [self.edge_frame_differences[cam][i] for cam in range(self.num_cameras)]
             
             # Calculate edge_velocity_min_ratio (the winning metric)
+            # Uses min/max ratio for better partial freeze detection
             min_edge_velocity = min(edge_velocities)
-            mean_edge_velocity = np.mean(edge_velocities)
+            max_edge_velocity = max(edge_velocities)
             
             # Avoid division by zero
-            if mean_edge_velocity > 0:
-                edge_velocity_min_ratio = min_edge_velocity / mean_edge_velocity
+            if max_edge_velocity > 0:
+                edge_velocity_min_ratio = min_edge_velocity / max_edge_velocity
             else:
                 edge_velocity_min_ratio = 0.0
             

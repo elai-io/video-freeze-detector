@@ -116,13 +116,13 @@ Edge-based metrics apply the same formulas but use edge-detected frame differenc
 ---
 
 ### 10. `edge_velocity_min_ratio` ⭐ **BEST METRIC**
-**Formula:** `min(edge_diff₁, edge_diff₂, edge_diff₃) / mean(edge_diff₁, edge_diff₂, edge_diff₃)`
+**Formula:** `min(edge_diff₁, edge_diff₂, edge_diff₃) / max(edge_diff₁, edge_diff₂, edge_diff₃)`
 
-**Description:** Ratio of minimum edge velocity to mean edge velocity.
+**Description:** Ratio of minimum edge velocity to maximum edge velocity.
 
 **Performance:** 85.7% detection rate on known freeze frames.
 
-**Interpretation:** Most effective at identifying relative freezes while being robust to noise and lighting changes.
+**Interpretation:** Most effective at identifying partial freezes (when 1-2 cameras freeze) while being robust to noise and lighting changes.
 
 ---
 
@@ -204,10 +204,11 @@ Based on analysis of known freeze frames:
 
 ### Why `edge_velocity_min_ratio` is the Best
 
-1. **Relative Measurement**: Compares minimum to mean, making it scale-invariant
-2. **Edge Preprocessing**: Benefits from noise reduction and lighting invariance
-3. **Simple and Robust**: Less sensitive to outliers than derivative-based metrics
-4. **Intuitive**: Directly measures the relative "freeze-ness" of the least active camera
+1. **Relative Measurement**: Compares minimum to maximum, making it scale-invariant
+2. **Partial Freeze Detection**: Better at detecting when only 1-2 cameras freeze
+3. **Edge Preprocessing**: Benefits from noise reduction and lighting invariance
+4. **Simple and Robust**: Less sensitive to outliers than derivative-based metrics
+5. **Intuitive**: Directly measures the relative "freeze-ness" of the least active camera
 
 ## 📊 Usage Examples
 
