@@ -181,3 +181,5 @@ Thumbs.db
 # Logs
 *.log
 logs/ 
+
+results/
