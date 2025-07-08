@@ -10,11 +10,13 @@ from modules.visualizer_edge import VisualizerEdge
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Video freeze detector using edge_velocity_min_ratio metric (85.7% accuracy)')
+    parser = argparse.ArgumentParser(description='Video freeze detector with comprehensive analysis')
     parser.add_argument('input_path', help='Path to folder with three video files (AVI/MP4)')
     parser.add_argument('--output', '-o', default='output', help='Output folder for results')
-    parser.add_argument('--freeze-threshold', '-t', type=float, default=10.0, 
-                        help='Percentage of suspicious frames to analyze (default 10%%)')
+    parser.add_argument('--freeze-threshold', '-t', type=float, default=0.25,
+                        help='Freeze detection threshold (default 0.25)')
+    parser.add_argument('--visualization-percent', '-p', type=float, default=5.0,
+                        help='Percentage of most suspicious frames to visualize (default 5.0%%)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
 
     
@@ -29,14 +31,13 @@ def main():
     output_path = args.output
     os.makedirs(output_path, exist_ok=True)
     
-    print(f"🎬 EDGE-BASED VIDEO FREEZE DETECTOR")
-    print(f"=" * 60)
-    print(f"Using edge_velocity_min_ratio method (min/max) - BEST METRIC")
-    print(f"Proven 85.7% accuracy on known freeze data")
+    print(f"🎬 VIDEO FREEZE DETECTOR WITH COMPREHENSIVE ANALYSIS")
+    print(f"=" * 70)
     print(f"Analyzing video files in folder: {args.input_path}")
     print(f"Results will be saved to: {output_path}")
-    print(f"Suspicious frames threshold: {args.freeze_threshold}%")
-    print("-" * 60)
+    print(f"Freeze detection threshold: {args.freeze_threshold}")
+    print(f"Visualization percent: {args.visualization_percent}%")
+    print("-" * 70)
     
     try:
         # Stage 1: Load and validate videos
@@ -51,146 +52,61 @@ def main():
                 print(f"  Camera {i+1} ({os.path.basename(file_path)}): {frame_count} frames")
             print()
         
-        # Stage 2: Frame analysis (both regular and edge-based)
+        # Stage 2: Frame analysis
         print("Stage 2: Analyzing frame differences...")
-        print("  - Computing regular frame differences...")
-        frame_differences = analyzer.compute_frame_differences()
-        
         print("  - Computing edge-based frame differences...")
         edge_frame_differences = analyzer.compute_edge_frame_differences()
         
-        # Stage 3: Edge-based freeze detection using edge_velocity_min_ratio
-        print("Stage 3: Detecting freezes using edge velocity analysis...")
-        print("  - Computing edge velocity metrics...")
-        print("  - Applying edge_velocity_min_ratio detection algorithm...")
+        # Stage 3: Freeze detection with new algorithm
+        print("Stage 3: Running comprehensive freeze analysis...")
+        detector = FreezeDetectorEdge(edge_frame_differences, 
+                                    freeze_threshold=args.freeze_threshold)
         
-        detector = FreezeDetectorEdge(frame_differences, edge_frame_differences, 
-                                    threshold_percent=args.freeze_threshold)
-        freeze_candidates = detector.detect_freezes()
+        # Get freeze candidates for visualization (top N% most suspicious)
+        freeze_candidates = detector.detect_freezes_for_visualization(args.visualization_percent)
+        print(f"Found {len(freeze_candidates)} frames for visualization (top {args.visualization_percent}%)")
         
-        print(f"Found {len(freeze_candidates)} suspicious moments using edge_velocity_min_ratio")
+        # Stage 4: Save data to CSV/Excel
+        print("Stage 4: Saving analysis data...")
+        csv_path = detector.save_to_csv(output_path)
+        xlsx_path = detector.save_to_xlsx(output_path)
         
-        # Stage 4: Enhanced visualization with edge differences
-        print("Stage 4: Creating enhanced images...")
+        # Stage 5: Create visualization images
+        print("Stage 5: Creating visualization images...")
         print("  - Creating previous/current frame pairs...")
         print("  - Creating edge difference images...")
         
         visualizer = VisualizerEdge(analyzer, output_path)
         visualizer.create_freeze_images(freeze_candidates)
         
-        # Stage 5: Statistics and reporting
-        print("Stage 5: Generating edge-based analysis report...")
+        # Stage 6: Generate statistics and reporting
+        print("Stage 6: Generating analysis report...")
         stats = detector.generate_statistics()
         
-        # Save report
-        report_path = os.path.join(output_path, 'edge_analysis_report.json')
+        # Save JSON report
+        report_path = os.path.join(output_path, 'freeze_analysis_report.json')
         with open(report_path, 'w', encoding='utf-8') as f:
-            json.dump(stats, f, indent=2, ensure_ascii=False)
+            json_results = {
+                'analysis_parameters': {
+                    'input_path': args.input_path,
+                    'freeze_threshold': args.freeze_threshold,
+                    'total_videos': len(video_files),
+                    'video_files': [os.path.basename(f) for f in video_files]
+                },
+                'statistics': stats,
+                'camera_statistics': detector.camera_statistics,
+                'suspicious_sequences': detector.suspicious_sequences,
+                'longest_sequences_per_camera': detector.get_top_longest_sequences(top_n=20, min_length=2),
+                'file_paths': {
+                    'csv_path': csv_path,
+                    'xlsx_path': xlsx_path,
+                    'json_report': report_path
+                }
+            }
+            json.dump(json_results, f, indent=2, ensure_ascii=False, default=str)
         
-        # Display statistics
-        print("\n" + "=" * 60)
-        print("EDGE-BASED FREEZE DETECTION RESULTS")
-        print("=" * 60)
-        
-        # Show frame counts first
-        print("\nFrame Counts:")
-        for i, (file_path, frame_count) in enumerate(zip(video_files, analyzer.frame_counts)):
-            print(f"  Camera {i+1} ({os.path.basename(file_path)}): {frame_count} frames")
-        
-        # Show top freeze candidates
-        print(f"\nTop {min(10, len(freeze_candidates))} Most Suspicious Moments:")
-        print("-" * 60)
-        for i, candidate in enumerate(freeze_candidates[:10], 1):
-            print(f"  {i:2d}. Frame {candidate['frame_index']:6d} | "
-                  f"Edge Vel Min Ratio: {candidate['edge_velocity_min_ratio']:8.6f} | "
-                  f"Camera {candidate['most_suspicious_camera']+1} | "
-                  f"Score: {candidate['suspicion_score']:8.6f}")
-        
-        # Camera-specific edge analysis
-        print("\nCamera Edge Analysis:")
-        for i, file_path in enumerate(video_files):
-            camera_stats = stats['cameras'][i]
-            print(f"\nCamera {i+1} ({os.path.basename(file_path)}):")
-            print(f"  Average edge difference: {camera_stats['avg_edge_difference']:.4f}")
-            print(f"  Average regular difference: {camera_stats['avg_regular_difference']:.4f}")
-            print(f"  Median edge difference: {camera_stats['median_edge_difference']:.4f}")
-            print(f"  Edge difference std: {camera_stats['std_edge_difference']:.4f}")
-            print(f"  Times most suspicious: {camera_stats['suspicious_count']}")
-            print(f"  Suspicion percentage: {camera_stats['freeze_percentage']:.2f}%")
-            
-            if camera_stats['freeze_percentage'] > 5.0:
-                severity = "HIGH"
-            elif camera_stats['freeze_percentage'] > 2.0:
-                severity = "MODERATE"
-            else:
-                severity = "LOW"
-            print(f"  Edge-based severity: {severity}")
-        
-        # Overall edge metrics
-        edge_analysis = stats['edge_analysis']
-        setup_metrics = stats['setup_metrics']
-        
-        print(f"\n" + "=" * 60)
-        print("OVERALL EDGE-BASED ANALYSIS")
-        print("=" * 60)
-        print(f"Total frames analyzed: {stats['total_frames']}")
-        print(f"Detection method: edge_velocity_min_ratio (min/max ratio)")
-        print(f"Average edge velocity min ratio: {edge_analysis['avg_edge_velocity_min_ratio']:.6f}")
-        print(f"Minimum edge velocity min ratio: {edge_analysis['min_edge_velocity_min_ratio']:.6f}")
-        print(f"Average edge velocity: {edge_analysis['avg_edge_velocity']:.4f}")
-        print(f"Edge stability coefficient: {edge_analysis['edge_stability']:.4f}")
-        
-        print(f"\nFreeze Detection Statistics:")
-        print(f"Overall freeze rate: {setup_metrics['overall_freeze_rate_percent']:.4f}% of analyzed frames")
-        print(f"Setup stability score: {setup_metrics['setup_stability_score']:.1f}/100")
-        print(f"Overall quality score: {setup_metrics['overall_quality_score']:.1f}/100")
-        
-        if setup_metrics['most_problematic_camera'] >= 0:
-            problematic_cam = setup_metrics['most_problematic_camera'] + 1
-            print(f"Most problematic camera: Camera {problematic_cam}")
-        else:
-            print("Most problematic camera: None (no significant edge variations detected)")
-        
-        print(f"Freeze distribution evenness: {setup_metrics['freeze_distribution_evenness']:.1f}/100")
-        
-        # Quality interpretation
-        quality_score = setup_metrics['overall_quality_score']
-        if quality_score >= 80:
-            quality_rating = "EXCELLENT"
-        elif quality_score >= 60:
-            quality_rating = "GOOD"
-        elif quality_score >= 40:
-            quality_rating = "FAIR"
-        else:
-            quality_rating = "POOR"
-        
-        print(f"Setup quality rating: {quality_rating}")
-        
-        # Camera balance info
-        balance = setup_metrics['camera_balance']
-        print(f"\nCamera Balance Analysis:")
-        print(f"  Suspicion distribution: {balance['suspicious_counts']}")
-        print(f"  Balance coefficient: {balance['stability_coefficient']:.4f}")
-        print(f"  (Lower values indicate more balanced behavior)")
-        
-        # Method comparison
-        print(f"\n" + "=" * 60)
-        print("EDGE_VELOCITY_MIN_RATIO ADVANTAGES")
-        print("=" * 60)
-        print("✓ 85.7% accuracy on known freeze data (BEST METRIC)")
-        print("✓ Detects low edge movement (freeze indicators)")
-        print("✓ Based on edge detection preprocessing - noise reduction")
-        print("✓ Min/max ratio - better partial freeze detection")
-        print("✓ Robust against lighting changes and minor movements")
-        print("✓ Enhanced visualization with edge difference images")
-        print("✓ Outperforms all other 15 tested metrics")
-        
-        print(f"\nFiles Generated:")
-        print(f"  Report: {report_path}")
-        print(f"  Images: {len(freeze_candidates)} sets of 3 images each")
-        print(f"  - _1: Previous frame")
-        print(f"  - _2: Current frame")
-        print(f"  - _3: Edge difference image")
+        # Display results
+        print_results(stats, video_files, freeze_candidates, detector, report_path)
         
     except Exception as e:
         print(f"Error during execution: {str(e)}")
@@ -198,6 +114,88 @@ def main():
             import traceback
             traceback.print_exc()
         sys.exit(1)
+
+
+def print_results(stats, video_files, freeze_candidates, detector, report_path):
+    """Print comprehensive analysis results"""
+    print("\n" + "=" * 70)
+    print("COMPREHENSIVE FREEZE ANALYSIS RESULTS")
+    print("=" * 70)
+    
+    # Get total freeze statistics
+    total_freeze_stats = detector.count_total_freezes()
+    
+    # Show top longest sequences per camera (length >= 2)
+    camera_sequences = detector.get_top_longest_sequences(top_n=15, min_length=2)
+    
+    if camera_sequences:
+        print(f"\nTop {min(15, len(camera_sequences))} Longest Freeze Sequences by Camera:")
+        print("-" * 80)
+        for i, seq in enumerate(camera_sequences[:15], 1):
+            severity_icon = {
+                'CRITICAL': '🔴',
+                'HIGH': '🟠', 
+                'MEDIUM': '🟡',
+                'LOW': '🟢'
+            }.get(seq['severity'], '⚪')
+            
+            print(f"  {i:2d}. Camera {seq['camera']} | "
+                  f"Frames {seq['start_frame']:3d}-{seq['end_frame']:3d} | "
+                  f"Length: {seq['length']:2d} | "
+                  f"Avg metric: {seq['avg_metric']:6.4f}")
+    else:
+        print(f"\nNo freeze sequences of length 2+ found.")
+    
+    # Camera analysis
+    print(f"\nCamera Analysis:")
+    for i, file_path in enumerate(video_files):
+        camera_stat = detector.camera_statistics[i]
+        freeze_count = camera_stat['freeze_count']
+        freeze_pct = camera_stat['freeze_percentage']
+        total_frames = camera_stat['total_frames']
+        
+        # Use same severity system as sequences
+        if freeze_pct >= 10.0:
+            severity = "CRITICAL 🔴"
+        elif freeze_pct >= 5.0:
+            severity = "HIGH 🟠"
+        elif freeze_pct >= 2.0:
+            severity = "MEDIUM 🟡"
+        else:
+            severity = "LOW 🟢"
+        
+        print(f"  Camera {i+1}: {freeze_count} freezes ({freeze_pct:.2f}%) of {total_frames} frames | {severity}")
+    
+    # Overall metrics
+    setup_metrics = stats['setup_metrics']
+    quality_score = setup_metrics['overall_quality_score']
+    overall_freeze_rate = setup_metrics['overall_freeze_rate_percent']
+    critical_sequences = setup_metrics['critical_sequences']
+    
+    # Use severity-based quality rating (inverted logic for quality)
+    if overall_freeze_rate >= 10.0:
+        quality_rating = "POOR 🔴"
+    elif overall_freeze_rate >= 5.0:
+        quality_rating = "BAD 🟠"
+    elif overall_freeze_rate >= 2.0:
+        quality_rating = "FAIR 🟡"
+    else:
+        quality_rating = "GOOD 🟢"
+    
+    # Calculate frame-based suspicious frames (any camera frozen in frame)
+    frame_based_suspicious = sum(1 for frame in detector.frame_data if frame['frame_freeze'] == 1)
+    frame_based_percentage = (frame_based_suspicious / detector.min_frames) * 100
+    
+    print(f"\n" + "=" * 70)
+    print("FINAL SUMMARY")
+    print("=" * 70)
+    print(f"📊 TOTAL FREEZE INSTANCES: {total_freeze_stats['total_freezes']} ({overall_freeze_rate:.2f}%)")
+    print(f"📊 SUSPICIOUS FRAMES: {frame_based_suspicious} ({frame_based_percentage:.2f}%)")
+    print(f"⚠️  CRITICAL PATTERNS: {critical_sequences} sequences (2+ frames)")
+    print(f"🎯 QUALITY RATING: {quality_rating}")
+    print(f"📁 IMAGES GENERATED: {len(freeze_candidates)} sets")
+    print(f"📄 DATA SAVED: CSV, Excel, and JSON reports")
+    print("=" * 70)
 
 
 if __name__ == "__main__":
