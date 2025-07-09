@@ -155,22 +155,6 @@ FINAL SUMMARY
 6. Create visualization images
 7. Export data to CSV/Excel/JSON
 
-## 📚 Key Improvements
-
-### Version 0.2.0 Features:
-- **Unified severity system** across all components
-- **Per-camera sequence detection** with proper counting
-- **Comprehensive data export** with multiple formats
-- **Quality-based rating system** with intuitive naming
-- **Percentage-based thresholds** that scale with video length
-- **Critical pattern detection** counting sequences per camera
-
-### Removed Legacy Components:
-- Jerk-based detection (3rd derivative approach)
-- Comprehensive vs standard mode distinction
-- Frame-based suspicious sequence counting
-- Complex quality scoring algorithms
-
 ---
 
 **This system provides accurate, comprehensive analysis of video freeze events with detailed reporting and visualization capabilities.** 
