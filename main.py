@@ -126,12 +126,13 @@ def print_results(stats, video_files, freeze_candidates, detector, report_path):
     total_freeze_stats = detector.count_total_freezes()
     
     # Show top longest sequences per camera (length >= 2)
-    camera_sequences = detector.get_top_longest_sequences(top_n=15, min_length=2)
+    top_n_sequences = 5
+    camera_sequences = detector.get_top_longest_sequences(top_n=top_n_sequences, min_length=2)
     
     if camera_sequences:
-        print(f"\nTop {min(15, len(camera_sequences))} Longest Freeze Sequences by Camera:")
+        print(f"\nTop {len(camera_sequences)} Longest Freeze Sequences by Camera:")
         print("-" * 80)
-        for i, seq in enumerate(camera_sequences[:15], 1):
+        for i, seq in enumerate(camera_sequences, 1):
             severity_icon = {
                 'CRITICAL': '🔴',
                 'HIGH': '🟠', 

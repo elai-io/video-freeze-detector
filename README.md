@@ -1,6 +1,6 @@
 # Video Freeze Detection System
 
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/elai-io/video-freeze-detector)
+[![Version](https://img.shields.io/badge/version-0.2.1-blue.svg)](https://github.com/elai-io/video-freeze-detector)
 
 A robust system for detecting video freezes in synchronized multi-camera recordings using edge-based frame difference analysis with comprehensive sequence detection.
 
@@ -117,7 +117,7 @@ All results are saved in the output folder:
 
 ### Console Output Example:
 ```
-Top 15 Longest Freeze Sequences by Camera:
+Top 2 Longest Freeze Sequences by Camera:
 --------------------------------------------------------------------------------
    1. Camera 2 | Frames  46- 47 | Length:  2 | Avg metric: 0.1123
    2. Camera 1 | Frames  21- 23 | Length:  3 | Avg metric: 0.2341
