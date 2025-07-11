@@ -5,10 +5,10 @@ This folder contains extra scripts for advanced analysis, metrics evaluation, an
 ## 📹 `video_quality_analyzer.py`
 
 **Purpose:**
-- Analyzes image quality metrics for all video files in a specified directory
+- Analyzes comprehensive image quality metrics for all video files in a specified directory
 - Supports any number of video files (not limited to 3 cameras)
-- Outputs Laplacian and Tenengrad variance values for each video file
-- Useful for comparing video quality across multiple files
+- Outputs 7 different quality metrics for each video file
+- Useful for comparing camera settings and video quality across multiple files
 
 **Usage:**
 ```bash
@@ -19,24 +19,31 @@ py scripts/video_quality_analyzer.py path/to/videos
 - `input_dir` — Path to directory containing video files
 - `--sample-frames` — Number of frames to sample per video (overrides --mode)
 - `--mode` — Analysis mode: fast (10 frames), normal (100 frames), full (all frames) (default: fast)
+- `--detailed`, `-d` — Show detailed metrics (brightness, contrast, saturation, color balance)
 - `--verbose`, `-v` — Verbose output with per-file analysis details
 
 **Usage Examples:**
 ```bash
-# Basic usage (fast mode - 10 frames)
+# Basic usage (fast mode - 10 frames, main metrics only)
 py scripts/video_quality_analyzer.py "C:\path\to\videos"
 
-# Normal mode (100 frames)
+# Fast mode with detailed metrics
+py scripts/video_quality_analyzer.py "C:\path\to\videos" --mode fast --detailed
+
+# Normal mode (100 frames, main metrics only)
 py scripts/video_quality_analyzer.py "C:\path\to\videos" --mode normal
 
-# Full analysis (all frames)
+# Normal mode with detailed metrics
+py scripts/video_quality_analyzer.py "C:\path\to\videos" --mode normal --detailed
+
+# Full analysis (all frames, main metrics only)
 py scripts/video_quality_analyzer.py "C:\path\to\videos" --mode full
 
-# Custom number of frames
-py scripts/video_quality_analyzer.py "C:\path\to\videos" --sample-frames 50 --verbose
+# Custom number of frames with detailed metrics
+py scripts/video_quality_analyzer.py "C:\path\to\videos" --sample-frames 50 --detailed --verbose
 ```
 
-**Example Output:**
+**Example Output (Default - Main Metrics):**
 ```
 📹 VIDEO QUALITY ANALYZER
 ====================================================================================================
@@ -45,24 +52,65 @@ Found 5 video files
 Analysis mode: fast (10 frames)
 ----------------------------------------------------------------------------------------------------
 
-====================================================================================================
+========================================
 QUALITY ANALYSIS RESULTS
-====================================================================================================
-Filename                                                               Laplacian ↑  Tenengrad ↑
-----------------------------------------------------------------------------------------------------
-camera1.mp4                                                            423.1        1247.8
-camera2.avi                                                            156.3        892.4
-camera3.mov                                                            87.9         445.2
-backup_cam.mkv                                                         312.7        1089.3
-security_feed_with_very_long_filename_example_that_shows_truncation... 201.5        756.9
-====================================================================================================
+========================================
+Filename   Sharpness  Focus      Noise     
+           Laplacian ↑ Tenengrad ↑ Level ~   
+----------------------------------------
+camera1.mp4    423.1      1247.8      2.1
+camera2.avi    156.3      892.4       3.4
+camera3.mov    87.9       445.2       1.8
+backup_cam.mkv 312.7      1089.3      2.7
+security_feed_with_very_long_filename_example.mp4 201.5 756.9 2.9
+========================================
 ✅ Analyzed 5 video files
-Note: Higher values indicate better quality (↑)
+Note: ↑ = higher is better, ↓ = lower is better, ~ = expected to be similar
+Use --detailed flag to see brightness, contrast, saturation, and color balance metrics
 ```
+
+**Example Output (Detailed Mode):**
+```
+📹 VIDEO QUALITY ANALYZER
+====================================================================================================
+Directory: C:\Videos\Test
+Found 5 video files
+Analysis mode: fast (10 frames)
+----------------------------------------------------------------------------------------------------
+
+============================================================================================
+QUALITY ANALYSIS RESULTS (DETAILED)
+============================================================================================
+Filename   Sharpness  Focus      Noise      Brightness Contrast   Saturation Color Balance
+           Laplacian ↑ Tenengrad ↑ Level ~    Avg ↑      Std ↑      HSV-S ↑    Deviation ↓ 
+--------------------------------------------------------------------------------------------
+camera1.mp4    423.1      1247.8      2.1        156.3      42.1       98.5       0.089
+camera2.avi    156.3      892.4       3.4        142.8      38.7       95.2       0.112
+camera3.mov    87.9       445.2       1.8        148.9      45.3       102.1      0.134
+backup_cam.mkv 312.7      1089.3      2.7        151.2      41.6       99.8       0.097
+security_feed_with_very_long_filename_example.mp4 201.5 756.9 2.9 145.6 39.8 97.3 0.105
+============================================================================================
+✅ Analyzed 5 video files
+Note: ↑ = higher is better, ↓ = lower is better, ~ = expected to be similar
+Metrics: Sharpness (Laplacian), Focus (Tenengrad), Noise (local variance),
+         Brightness (0-255), Contrast (Std Dev), Saturation (HSV-S), Color Balance (deviation)
+```
+
+**Features:**
+- **Dynamic table width**: Automatically adjusts to the longest filename
+- **No filename truncation**: Full filenames are always displayed
+- **Compact default view**: Shows only main metrics (Sharpness, Focus, Noise) by default
+- **Detailed mode**: Use `--detailed` flag to see all 7 metrics
+- **Efficient layout**: Optimized for readability and screen space
 
 **Metrics:**
 - **Laplacian ↑** — Sharpness measurement (higher = sharper)
 - **Tenengrad ↑** — Focus quality (higher = better focus)
+- **Noise ~** — Local variance noise estimate (expected to be similar across cameras)
+- **Brightness ↑** — Average pixel brightness (0-255, higher = brighter)
+- **Contrast ↑** — Standard deviation of pixel values (higher = more contrast)
+- **Saturation ↑** — Color saturation from HSV (higher = more saturated)
+- **Color Balance ↓** — Deviation from neutral color balance (lower = more neutral)
 
 ---
 

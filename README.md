@@ -1,6 +1,6 @@
 # Video Freeze Detection System
 
-[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/elai-io/video-freeze-detector)
+[![Version](https://img.shields.io/badge/version-0.3.1-blue.svg)](https://github.com/elai-io/video-freeze-detector)
 
 A robust system for detecting video freezes in synchronized multi-camera recordings using edge-based frame difference analysis with comprehensive sequence detection.
 
