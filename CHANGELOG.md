@@ -167,18 +167,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Pandas for data handling
   - Matplotlib for visualization
 
----
-
-## [Unreleased]
-
-### Planned
-- **Real-time Analysis** - Live video stream processing
-- **Web Interface** - Browser-based analysis tool
-- **Machine Learning Integration** - AI-powered freeze detection
-- **Multi-language Support** - Internationalization
-- **Plugin System** - Extensible architecture for custom metrics
-
-### Known Issues
-- Performance optimization for large video files
-- Memory usage optimization for long sequences
-- Cross-platform compatibility improvements 
