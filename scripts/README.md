@@ -23,16 +23,16 @@ py scripts/video_quality_analyzer.py path/to/videos
 
 **Usage Examples:**
 ```bash
-# Базовое использование (быстрый режим - 10 кадров)
+# Basic usage (fast mode - 10 frames)
 py scripts/video_quality_analyzer.py "C:\path\to\videos"
 
-# Нормальный режим (100 кадров)
+# Normal mode (100 frames)
 py scripts/video_quality_analyzer.py "C:\path\to\videos" --mode normal
 
-# Полный анализ (все кадры)
+# Full analysis (all frames)
 py scripts/video_quality_analyzer.py "C:\path\to\videos" --mode full
 
-# Кастомное количество кадров
+# Custom number of frames
 py scripts/video_quality_analyzer.py "C:\path\to\videos" --sample-frames 50 --verbose
 ```
 
@@ -133,20 +133,20 @@ py scripts/save_central_diffs.py
 
 **For details on the main freeze detection pipeline, see the main project README.**
 
-## Структура зависимостей
+## Dependency Structure
 
 ```
 scripts/
-├── video_quality_analyzer.py    # Анализ качества видео файлов
-├── metrics_analyzer.py          # Анализ метрик
-├── save_central_diffs.py        # Создание diff изображений
-├── METRICS_ANALYZER_README.md   # Документация анализатора
-└── README.md                    # Общая документация
+├── video_quality_analyzer.py    # Video file quality analysis
+├── metrics_analyzer.py          # Metrics analysis
+├── save_central_diffs.py        # Diff image creation
+├── METRICS_ANALYZER_README.md   # Analyzer documentation
+└── README.md                    # General documentation
 ```
 
-## Примечания
+## Notes
 
-- Все скрипты используют модули из папки `../modules/`
-- Результаты сохраняются в соответствующие папки
-- Скрипты можно запускать независимо от main.py
-- Поддерживаются те же форматы видео (MP4, AVI, MOV, MKV) 
+- All scripts use modules from the `../modules/` folder
+- Results are saved in their respective folders
+- Scripts can be run independently of main.py
+- Same video formats are supported (MP4, AVI, MOV, MKV) 
