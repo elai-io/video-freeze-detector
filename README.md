@@ -4,6 +4,8 @@
 
 A robust system for detecting video freezes in synchronized multi-camera recordings using edge-based frame difference analysis with comprehensive sequence detection.
 
+📋 **[Changelog](CHANGELOG.md)** - See what's new in each version
+
 ## 🚀 Quick Start
 
 ### 1. Install dependencies
