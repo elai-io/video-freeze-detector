@@ -57,6 +57,12 @@ def main():
         print("  - Computing edge-based frame differences...")
         edge_frame_differences = analyzer.compute_edge_frame_differences()
         
+        # Stage 2.1: Image quality analysis
+        print("Stage 2.1: Computing image quality metrics...")
+        print("  - Computing Laplacian variance (sharpness)...")
+        print("  - Computing Tenengrad variance (focus quality)...")
+        quality_metrics = analyzer.compute_image_quality_metrics()
+        
         # Stage 3: Freeze detection with new algorithm
         print("Stage 3: Running comprehensive freeze analysis...")
         detector = FreezeDetectorEdge(edge_frame_differences, 
@@ -97,6 +103,7 @@ def main():
                 'camera_statistics': detector.camera_statistics,
                 'suspicious_sequences': detector.suspicious_sequences,
                 'longest_sequences_per_camera': detector.get_top_longest_sequences(top_n=20, min_length=2),
+                'image_quality_metrics': quality_metrics,
                 'file_paths': {
                     'csv_path': csv_path,
                     'xlsx_path': xlsx_path,
@@ -106,7 +113,7 @@ def main():
             json.dump(json_results, f, indent=2, ensure_ascii=False, default=str)
         
         # Display results
-        print_results(stats, video_files, freeze_candidates, detector, report_path)
+        print_results(stats, video_files, freeze_candidates, detector, report_path, quality_metrics)
         
     except Exception as e:
         print(f"Error during execution: {str(e)}")
@@ -116,7 +123,7 @@ def main():
         sys.exit(1)
 
 
-def print_results(stats, video_files, freeze_candidates, detector, report_path):
+def print_results(stats, video_files, freeze_candidates, detector, report_path, quality_metrics):
     """Print comprehensive analysis results"""
     print("\n" + "=" * 70)
     print("COMPREHENSIVE FREEZE ANALYSIS RESULTS")
@@ -166,6 +173,16 @@ def print_results(stats, video_files, freeze_candidates, detector, report_path):
             severity = "LOW 🟢"
         
         print(f"  Camera {i+1}: {freeze_count} freezes ({freeze_pct:.2f}%) of {total_frames} frames | {severity}")
+    
+    # Image quality analysis
+    print(f"\nImage Quality Analysis:")
+    for i, file_path in enumerate(video_files):
+        laplacian = quality_metrics['laplacian_variance'][i]
+        tenengrad = quality_metrics['tenengrad_variance'][i]
+        
+        print(f"  Camera {i+1} Quality:")
+        print(f"    Sharpness (Laplacian ↑): {laplacian:.1f}")
+        print(f"    Focus (Tenengrad ↑): {tenengrad:.1f}")
     
     # Overall metrics
     setup_metrics = stats['setup_metrics']

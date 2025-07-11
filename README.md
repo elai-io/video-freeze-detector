@@ -1,6 +1,6 @@
 # Video Freeze Detection System
 
-[![Version](https://img.shields.io/badge/version-0.2.1-blue.svg)](https://github.com/elai-io/video-freeze-detector)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/elai-io/video-freeze-detector)
 
 A robust system for detecting video freezes in synchronized multi-camera recordings using edge-based frame difference analysis with comprehensive sequence detection.
 
@@ -72,15 +72,20 @@ VideoFreezeDetector/
 
 4. **Sequence Analysis:** Finds longest consecutive freeze sequences for each camera individually.
 
-5. **Quality Assessment:** Provides unified severity ratings based on freeze percentages.
+5. **Image Quality Assessment:** Analyzes overall video quality using two metrics:
+   - **Laplacian Variance** for sharpness measurement
+   - **Tenengrad Variance** for focus quality assessment
+
+6. **Quality Assessment:** Provides unified severity ratings based on freeze percentages and image quality.
 
 ### Key Features:
 
 - **Per-camera sequence detection:** Identifies longest freeze sequences for each camera
 - **Unified severity system:** CRITICAL/HIGH/MEDIUM/LOW based on percentage thresholds
+- **Image quality analysis:** Evaluates sharpness and focus quality per camera
 - **Comprehensive reporting:** CSV, Excel, and JSON outputs with detailed frame data
 - **Visual analysis:** Creates annotated images for most suspicious frames
-- **Quality rating:** Overall system quality assessment
+- **Quality rating:** Overall system quality assessment including image quality metrics
 
 ## 📊 Analysis Metrics
 
@@ -95,6 +100,24 @@ VideoFreezeDetector/
 - **BAD 🟠**: 5-9.9% total freeze instances
 - **FAIR 🟡**: 2-4.9% total freeze instances  
 - **GOOD 🟢**: <2% total freeze instances
+
+### Image Quality Metrics:
+
+The system analyzes the overall quality of each camera's video feed using two complementary metrics:
+
+#### **Laplacian Variance (Sharpness ↑)**
+- **Purpose**: Measures image sharpness and focus quality
+- **Method**: Applies Laplacian edge detection and calculates variance
+- **Interpretation**: Higher values = sharper images
+- **Typical range**: 50-1000+ (depends on content and resolution)
+
+#### **Tenengrad Variance (Focus Quality ↑)**
+- **Purpose**: Alternative focus quality measurement using gradient magnitude
+- **Method**: Applies Sobel filters and calculates gradient variance
+- **Interpretation**: Higher values = better focus
+- **Typical range**: 100-5000+ (depends on content and resolution)
+
+**Note**: The ↑ symbol indicates that higher values represent better quality. These metrics help identify cameras with poor image quality that might affect freeze detection accuracy or indicate hardware issues.
 
 ## 📦 Output Files
 
@@ -126,6 +149,17 @@ Camera Analysis:
   Camera 1: 59 freezes (9.23%) of 639 frames | HIGH 🟠
   Camera 2: 66 freezes (10.33%) of 639 frames | CRITICAL 🔴
   Camera 3: 32 freezes (5.01%) of 639 frames | HIGH 🟠
+
+Image Quality Analysis:
+  Camera 1 Quality:
+    Sharpness (Laplacian ↑): 423.1
+    Focus (Tenengrad ↑): 1247.8
+  Camera 2 Quality:
+    Sharpness (Laplacian ↑): 156.3
+    Focus (Tenengrad ↑): 892.4
+  Camera 3 Quality:
+    Sharpness (Laplacian ↑): 87.9
+    Focus (Tenengrad ↑): 445.2
 
 ======================================================================
 FINAL SUMMARY

@@ -1,7 +1,7 @@
 import os
 import cv2
 import numpy as np
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict, Any
 from numpy.typing import NDArray
 from tqdm import tqdm  # Progress bar
 
@@ -26,7 +26,8 @@ class VideoAnalyzer:
         self.frame_counts: List[int] = []
         self.fps_values: List[float] = []
         self.video_captures: List[cv2.VideoCapture] = []
-        
+
+
     def load_videos(self) -> List[str]:
         """
         Load and validate video files
@@ -66,7 +67,8 @@ class VideoAnalyzer:
                 print(f"  FPS: {fps:.2f}")
         
         return self.video_files
-    
+
+
     def validate_synchronization(self) -> bool:
         """
         Validate video file synchronization
@@ -78,7 +80,113 @@ class VideoAnalyzer:
             return False
         
         return all(count == self.frame_counts[0] for count in self.frame_counts)
-    
+
+
+    def compute_laplacian_variance(self, frame: NDArray) -> float:
+        """
+        Compute Laplacian variance (measure of image sharpness/focus)
+        
+        Args:
+            frame: Input frame (BGR)
+            
+        Returns:
+            Laplacian variance value (higher = sharper)
+        """
+        # Convert to grayscale
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        
+        # Apply Laplacian filter
+        laplacian = cv2.Laplacian(gray, cv2.CV_64F)
+        
+        # Return variance of Laplacian
+        return float(np.var(laplacian))
+
+
+    def compute_tenengrad_variance(self, frame: NDArray) -> float:
+        """
+        Compute Tenengrad variance (another measure of image sharpness)
+        
+        Args:
+            frame: Input frame (BGR)
+            
+        Returns:
+            Tenengrad variance value (higher = sharper)
+        """
+        # Convert to grayscale
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        
+        # Apply Sobel filters
+        sobel_x = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+        sobel_y = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+        
+        # Compute gradient magnitude
+        gradient_magnitude = np.sqrt(sobel_x**2 + sobel_y**2)
+        
+        # Return variance of gradient magnitude
+        return float(np.var(gradient_magnitude))
+
+
+
+
+
+    def compute_image_quality_metrics(self) -> Dict[str, List[float]]:
+        """
+        Compute average image quality metrics for all cameras
+        
+        Returns:
+            Dictionary with quality metrics for each camera
+        """
+        print("Computing image quality metrics...")
+        
+        quality_metrics = {
+            'laplacian_variance': [],
+            'tenengrad_variance': []
+        }
+        
+        min_frames = min(self.frame_counts)
+        sample_frames = min(100, min_frames)  # Sample up to 100 frames for efficiency
+        frame_indices = np.linspace(0, min_frames - 1, sample_frames, dtype=int)
+        
+        for camera_idx in range(len(self.video_captures)):
+            if self.verbose:
+                print(f"Analyzing image quality for camera {camera_idx + 1}...")
+            
+            cap = self.video_captures[camera_idx]
+            
+            laplacian_values = []
+            tenengrad_values = []
+            
+            frame_iter = frame_indices
+            if self.verbose:
+                frame_iter = tqdm(frame_indices, desc=f"Camera {camera_idx + 1} quality", unit="frame", leave=False)
+            
+            for frame_idx in frame_iter:
+                cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+                ret, frame = cap.read()
+                
+                if not ret:
+                    continue
+                
+                # Compute Laplacian variance
+                laplacian_var = self.compute_laplacian_variance(frame)
+                laplacian_values.append(laplacian_var)
+                
+                # Compute Tenengrad variance
+                tenengrad_var = self.compute_tenengrad_variance(frame)
+                tenengrad_values.append(tenengrad_var)
+            
+            # Store average values
+            quality_metrics['laplacian_variance'].append(float(np.mean(laplacian_values)) if laplacian_values else 0.0)
+            quality_metrics['tenengrad_variance'].append(float(np.mean(tenengrad_values)) if tenengrad_values else 0.0)
+            
+            if self.verbose:
+                print(f"  Camera {camera_idx + 1} quality metrics:")
+                print(f"    Laplacian variance: {quality_metrics['laplacian_variance'][-1]:.2f}")
+                print(f"    Tenengrad variance: {quality_metrics['tenengrad_variance'][-1]:.2f}")
+        
+        return quality_metrics
+
+
     def compute_frame_differences(self) -> List[List[float]]:
         """
         Compute mean of differences between consecutive frames for all videos
@@ -118,7 +226,8 @@ class VideoAnalyzer:
             if self.verbose:
                 print(f"  Average difference (BGR): {np.mean(differences):.2f}")
         return all_differences
-    
+
+
     def apply_edge_detection(self, frame: NDArray) -> NDArray:
         """
         Apply edge detection to frame
@@ -139,7 +248,8 @@ class VideoAnalyzer:
         edges = cv2.Canny(blurred, 50, 150)
         
         return edges
-    
+
+
     def compute_edge_frame_differences(self) -> List[List[float]]:
         """
         Compute mean of differences between consecutive frames using edge detection
@@ -182,7 +292,8 @@ class VideoAnalyzer:
             if self.verbose:
                 print(f"  Average edge difference: {np.mean(differences):.2f}")
         return all_differences
-    
+
+
     def get_frame_at_index(self, camera_index: int, frame_index: int) -> Union[NDArray, None]:
         """
         Get frame at specific index from specified camera
@@ -202,7 +313,8 @@ class VideoAnalyzer:
         ret, frame = cap.read()
         
         return frame if ret else None
-    
+
+
     def get_frame_size(self, camera_index: int = 0) -> Tuple[int, int]:
         """
         Get frame size
@@ -221,7 +333,8 @@ class VideoAnalyzer:
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         
         return (width, height)
-    
+
+
     def close(self):
         """
         Close all video captures

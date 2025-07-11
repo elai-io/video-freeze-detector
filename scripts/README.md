@@ -2,6 +2,70 @@
 
 This folder contains extra scripts for advanced analysis, metrics evaluation, and visualization. These are not required for basic freeze detection, but provide powerful tools for research and diagnostics.
 
+## 📹 `video_quality_analyzer.py`
+
+**Purpose:**
+- Analyzes image quality metrics for all video files in a specified directory
+- Supports any number of video files (not limited to 3 cameras)
+- Outputs Laplacian and Tenengrad variance values for each video file
+- Useful for comparing video quality across multiple files
+
+**Usage:**
+```bash
+py scripts/video_quality_analyzer.py path/to/videos
+```
+
+**Arguments:**
+- `input_dir` — Path to directory containing video files
+- `--sample-frames` — Number of frames to sample per video (overrides --mode)
+- `--mode` — Analysis mode: fast (10 frames), normal (100 frames), full (all frames) (default: fast)
+- `--verbose`, `-v` — Verbose output with per-file analysis details
+
+**Usage Examples:**
+```bash
+# Базовое использование (быстрый режим - 10 кадров)
+py scripts/video_quality_analyzer.py "C:\path\to\videos"
+
+# Нормальный режим (100 кадров)
+py scripts/video_quality_analyzer.py "C:\path\to\videos" --mode normal
+
+# Полный анализ (все кадры)
+py scripts/video_quality_analyzer.py "C:\path\to\videos" --mode full
+
+# Кастомное количество кадров
+py scripts/video_quality_analyzer.py "C:\path\to\videos" --sample-frames 50 --verbose
+```
+
+**Example Output:**
+```
+📹 VIDEO QUALITY ANALYZER
+====================================================================================================
+Directory: C:\Videos\Test
+Found 5 video files
+Analysis mode: fast (10 frames)
+----------------------------------------------------------------------------------------------------
+
+====================================================================================================
+QUALITY ANALYSIS RESULTS
+====================================================================================================
+Filename                                                               Laplacian ↑  Tenengrad ↑
+----------------------------------------------------------------------------------------------------
+camera1.mp4                                                            423.1        1247.8
+camera2.avi                                                            156.3        892.4
+camera3.mov                                                            87.9         445.2
+backup_cam.mkv                                                         312.7        1089.3
+security_feed_with_very_long_filename_example_that_shows_truncation... 201.5        756.9
+====================================================================================================
+✅ Analyzed 5 video files
+Note: Higher values indicate better quality (↑)
+```
+
+**Metrics:**
+- **Laplacian ↑** — Sharpness measurement (higher = sharper)
+- **Tenengrad ↑** — Focus quality (higher = better focus)
+
+---
+
 ## 📊 `metrics_analyzer.py`
 
 **Purpose:**
@@ -73,6 +137,7 @@ py scripts/save_central_diffs.py
 
 ```
 scripts/
+├── video_quality_analyzer.py    # Анализ качества видео файлов
 ├── metrics_analyzer.py          # Анализ метрик
 ├── save_central_diffs.py        # Создание diff изображений
 ├── METRICS_ANALYZER_README.md   # Документация анализатора
