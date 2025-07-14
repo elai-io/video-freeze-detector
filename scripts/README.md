@@ -144,6 +144,69 @@ py scripts/metrics_analyzer.py videos --known-freezes 43 89 93 149 153 182 205 2
 
 ---
 
+## 🖼️ `save_frame_diffs.py`
+
+**Purpose:**
+- Advanced frame difference analysis for single video files
+- Creates side-by-side visualizations (original crop + frame difference)
+- Performs dual analysis: regular frame differences + edge-based differences
+- Generates video from all difference frames with configurable FPS
+- Comprehensive plotting with both difference types
+
+**Usage:**
+```bash
+py scripts/save_frame_diffs.py "path/to/video.mp4" "output/directory"
+```
+
+**Arguments:**
+- `video_file` — Path to input video file (MP4, AVI, MOV, MKV)
+- `output_dir` — Output directory for difference images and analysis
+- `--fps` — FPS for output video (default: 5.0)
+- `--contrast` — Contrast factor for difference images (default: 2.0)
+- `--crop-fraction` — Fraction of width for center crop (creates square, default: 0.5)
+- `--no-video` — Skip creating output video
+- `--no-plot` — Skip saving the plot of differences
+- `--verbose`, `-v` — Verbose output with per-frame details
+
+**Usage Examples:**
+```bash
+# Basic usage with default settings
+py scripts/save_frame_diffs.py "C:\videos\test.mp4" "results\test_analysis"
+
+# Custom FPS and contrast
+py scripts/save_frame_diffs.py "C:\videos\test.mp4" "results\test_analysis" --fps 10 --contrast 3.0
+
+# Large crop area (70% of width)
+py scripts/save_frame_diffs.py "C:\videos\test.mp4" "results\test_analysis" --crop-fraction 0.7
+
+# Skip video generation, only save images and plots
+py scripts/save_frame_diffs.py "C:\videos\test.mp4" "results\test_analysis" --no-video
+
+# Verbose output for debugging
+py scripts/save_frame_diffs.py "C:\videos\test.mp4" "results\test_analysis" --verbose
+```
+
+**Outputs:**
+- `diff_XXXX.png` — Side-by-side images (original crop + frame difference)
+- `frame_differences_video.mp4` — Video compilation of all difference frames
+- `frame_differences_plot.png` — Combined plot showing regular and edge differences
+- `frame_differences_data.csv` — CSV data with both difference types
+
+**Features:**
+- **Side-by-side visualization**: Original crop (left) + frame difference (right)
+- **Dual analysis**: Regular frame differences + Canny edge-based differences
+- **Video generation**: Automatic creation of difference video with configurable FPS
+- **Comprehensive plotting**: Two subplots showing both difference types
+- **Enhanced annotations**: Frame numbers, difference values, and labels
+- **Flexible cropping**: Configurable center crop fraction (default 50% width)
+
+**Analysis Types:**
+- **Regular differences**: Pixel-by-pixel differences between consecutive frames
+- **Edge differences**: Differences in Canny edge maps (structural changes)
+- **Combined statistics**: Separate analysis for each difference type
+
+---
+
 ## 🖼️ `save_central_diffs.py`
 
 **Purpose:**
@@ -187,6 +250,7 @@ py scripts/save_central_diffs.py
 scripts/
 ├── video_quality_analyzer.py    # Video file quality analysis
 ├── metrics_analyzer.py          # Metrics analysis
+├── save_frame_diffs.py          # Advanced frame difference analysis
 ├── save_central_diffs.py        # Diff image creation
 ├── METRICS_ANALYZER_README.md   # Analyzer documentation
 └── README.md                    # General documentation

@@ -5,6 +5,48 @@ All notable changes to the Video Freeze Detection System will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-01-10
+
+### Added
+- **Enhanced Frame Difference Analysis Script** (`scripts/save_frame_diffs.py`):
+  - **Side-by-side visualization**: Original crop (left) + frame difference (right)
+  - **Dual analysis**: Regular frame differences + edge-based differences
+  - **Canny edge detection** for structural change analysis
+  - **Video generation** from all difference frames with configurable FPS
+  - **Comprehensive plotting**: Two subplots showing both difference types
+  - **Enhanced CSV export** with both regular and edge difference data
+  - **Flexible cropping**: Configurable center crop fraction (default 50% width)
+  - **Improved annotations**: Frame numbers, difference values, and labels
+
+### Added
+- **New CLI parameters** for frame difference analysis:
+  - `--fps` - Output video FPS (default: 5.0)
+  - `--crop-fraction` - Center crop fraction (default: 0.5)
+  - `--no-video` - Skip video generation
+  - `--no-plot` - Skip plotting
+- **Edge-based analysis**:
+  - Gaussian blur preprocessing for noise reduction
+  - Canny edge detector (thresholds: 50, 150)
+  - Edge difference computation between consecutive frames
+  - Separate statistics for edge differences
+- **Enhanced visualization**:
+  - Combined plots with regular and edge differences
+  - Separate statistics for each analysis type
+  - Color-coded graphs (blue for regular, green for edges)
+  - Comprehensive statistical information
+
+### Changed
+- **Improved frame correspondence**: Original frame now matches the difference frame
+- **Better crop logic**: Crop fraction applies to width, creating square crops
+- **Enhanced VS Code configuration** with new script parameters
+- **Updated documentation** with new script features and usage examples
+
+### Fixed
+- **Frame alignment issue**: Original and difference frames now properly correspond
+- **Crop calculation**: Fixed to use width-based cropping for consistent square crops
+
+---
+
 ## [0.3.1] - 2025-01-10
 
 ### Added
