@@ -5,7 +5,7 @@ All notable changes to the Video Freeze Detection System will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.0] - 2025-01-10
+## [0.4.0] - 2025-07-14
 
 ### Added
 - **Enhanced Frame Difference Analysis Script** (`scripts/save_frame_diffs.py`):
@@ -47,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.3.1] - 2025-01-10
+## [0.3.1] - 2025-07-11
 
 ### Added
 - **Enhanced Video Quality Analyzer** with 7 comprehensive metrics:
@@ -84,7 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.3.0] - 2025-01-10
+## [0.3.0] - 2025-07-11
 
 ### Added
 - **Video Quality Analyzer Script** (`scripts/video_quality_analyzer.py`):
@@ -113,7 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.2.1] - 2025-01-10
+## [0.2.1] - 2025-07-09
 
 ### Added
 - **Image Quality Analysis** to main freeze detection pipeline
@@ -132,7 +132,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.2.0] - 2025-01-10
+## [0.2.0] - 2025-07-08
 
 ### Added
 - **Edge-based Freeze Detection** with comprehensive sequence analysis
@@ -174,7 +174,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.0] - 2025-01-10
+## [0.1.0] - 2025-07-07
 
 ### Added
 - **Initial Video Freeze Detection System**
