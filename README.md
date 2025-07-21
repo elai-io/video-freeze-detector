@@ -75,16 +75,19 @@ VideoFreezeDetector/
 4. **Sequence Analysis:** Finds longest consecutive freeze sequences for each camera individually.
 
 5. **Image Quality Assessment:** Analyzes overall video quality using two metrics:
-   - **Laplacian Variance** for sharpness measurement
-   - **Tenengrad Variance** for focus quality assessment
+   - **Laplacian Variance** for sharpness measurement (focused on central face region)
+   - **Tenengrad Variance** for focus quality assessment (focused on central face region)
 
-6. **Quality Assessment:** Provides unified severity ratings based on freeze percentages and image quality.
+6. **Multi-Camera Edge Differences Plot:** Creates comprehensive visualization showing edge differences over frames for all three cameras simultaneously.
+
+7. **Quality Assessment:** Provides unified severity ratings based on freeze percentages and image quality.
 
 ### Key Features:
 
 - **Per-camera sequence detection:** Identifies longest freeze sequences for each camera
 - **Unified severity system:** CRITICAL/HIGH/MEDIUM/LOW based on percentage thresholds
-- **Image quality analysis:** Evaluates sharpness and focus quality per camera
+- **Image quality analysis:** Evaluates sharpness and focus quality per camera (focused on central face region)
+- **Multi-camera visualization:** Edge differences plot showing all cameras over time
 - **Comprehensive reporting:** CSV, Excel, and JSON outputs with detailed frame data
 - **Visual analysis:** Creates annotated images for most suspicious frames
 - **Quality rating:** Overall system quality assessment including image quality metrics
@@ -109,15 +112,17 @@ The system analyzes the overall quality of each camera's video feed using two co
 
 #### **Laplacian Variance (Sharpness ↑)**
 - **Purpose**: Measures image sharpness and focus quality
-- **Method**: Applies Laplacian edge detection and calculates variance
+- **Method**: Applies Laplacian edge detection and calculates variance on central face region (20% width, 50% height)
 - **Interpretation**: Higher values = sharper images
 - **Typical range**: 50-1000+ (depends on content and resolution)
+- **Optimization**: Analyzes only 20 sample frames for efficiency
 
 #### **Tenengrad Variance (Focus Quality ↑)**
 - **Purpose**: Alternative focus quality measurement using gradient magnitude
-- **Method**: Applies Sobel filters and calculates gradient variance
+- **Method**: Applies Sobel filters and calculates gradient variance on central face region (20% width, 50% height)
 - **Interpretation**: Higher values = better focus
 - **Typical range**: 100-5000+ (depends on content and resolution)
+- **Optimization**: Analyzes only 20 sample frames for efficiency
 
 **Note**: The ↑ symbol indicates that higher values represent better quality. These metrics help identify cameras with poor image quality that might affect freeze detection accuracy or indicate hardware issues.
 
@@ -137,6 +142,7 @@ All results are saved in the output folder:
 - `{rank}_{frame}_{metric}_cam{N}_1.jpg` — Previous frame (center region)
 - `{rank}_{frame}_{metric}_cam{N}_2.jpg` — Current frame (center region)
 - `{rank}_{frame}_{metric}_cam{N}_3.jpg` — Edge difference visualization
+- `edge_differences_plot.png` — Multi-camera edge differences over time plot
 
 ## 📈 Analysis Output
 
@@ -172,6 +178,7 @@ FINAL SUMMARY
 🎯 QUALITY RATING: BAD 🟠
 📁 IMAGES GENERATED: 32 sets
 📄 DATA SAVED: CSV, Excel, and JSON reports
+📊 PLOTS GENERATED: Multi-camera edge differences visualization
 ======================================================================
 ```
 
@@ -188,7 +195,7 @@ FINAL SUMMARY
 3. Detect freezes using normalized threshold
 4. Find longest sequences per camera
 5. Generate comprehensive statistics
-6. Create visualization images
+6. Create visualization images and multi-camera plots
 7. Export data to CSV/Excel/JSON
 
 ---
