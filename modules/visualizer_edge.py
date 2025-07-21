@@ -239,7 +239,7 @@ class VisualizerEdge:
         print(f"Creating {len(freeze_candidates)} image sets (3 images each)...")
         
         candidate_iter = freeze_candidates
-        if len(freeze_candidates) > 20:
+        if len(freeze_candidates) > 5:
             candidate_iter = tqdm(freeze_candidates, desc="Freeze images", unit="img")
         
         for rank, candidate in enumerate(candidate_iter, 1):

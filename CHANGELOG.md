@@ -5,6 +5,15 @@ All notable changes to the Video Freeze Detection System will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2025-07-14
+
+### Fixed
+- **Aspect ratio preservation**: Fixed face region scaling in image quality analysis to maintain proper proportions instead of creating distorted square images
+- **Face region extraction**: Corrected `extract_face_region()` function in `modules/video_analyzer.py` to properly scale extracted regions while preserving aspect ratios
+- **Visualization consistency**: Ensured all face region visualizations maintain correct proportions across different scaling operations
+
+---
+
 ## [0.4.0] - 2025-07-14
 
 ### Added
@@ -209,3 +218,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Pandas for data handling
   - Matplotlib for visualization
 
+ 

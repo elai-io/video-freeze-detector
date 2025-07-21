@@ -3,6 +3,8 @@ import os
 import sys
 from typing import List, Tuple
 import json
+import numpy as np
+import matplotlib.pyplot as plt
 
 from modules.video_analyzer import VideoAnalyzer
 from modules.freeze_detector_edge import FreezeDetectorEdge
@@ -11,7 +13,7 @@ from modules.visualizer_edge import VisualizerEdge
 
 def main():
     parser = argparse.ArgumentParser(description='Video freeze detector with comprehensive analysis')
-    parser.add_argument('input_path', help='Path to folder with three video files (AVI/MP4)')
+    parser.add_argument('input_path', help='Path to folder with three video files (AVI/MP4/MOV)')
     parser.add_argument('--output', '-o', default='output', help='Output folder for results')
     parser.add_argument('--freeze-threshold', '-t', type=float, default=0.25,
                         help='Freeze detection threshold (default 0.25)')
@@ -85,6 +87,10 @@ def main():
         visualizer = VisualizerEdge(analyzer, output_path)
         visualizer.create_freeze_images(freeze_candidates)
         
+        # Stage 5.5: Create edge differences plot
+        print("Stage 5.5: Creating edge differences plot...")
+        create_edge_differences_plot(edge_frame_differences, output_path)
+        
         # Stage 6: Generate statistics and reporting
         print("Stage 6: Generating analysis report...")
         stats = detector.generate_statistics()
@@ -121,6 +127,85 @@ def main():
             import traceback
             traceback.print_exc()
         sys.exit(1)
+
+
+def create_edge_differences_plot(edge_frame_differences: List[List[float]], output_path: str):
+    """
+    Create Edge Differences by Frame plot for all three cameras
+    
+    Args:
+        edge_frame_differences: List of edge differences for each camera
+        output_path: Output directory path
+    """
+    # Find minimum frame count
+    min_frames = min(len(diffs) for diffs in edge_frame_differences)
+    if min_frames == 0:
+        print("  Warning: No edge differences data available")
+        return
+    
+    # Create frame axis (frame numbers)
+    frame_axis = np.arange(1, min_frames + 1)  # Start from frame 1
+    
+    # Create figure
+    plt.figure(figsize=(14, 8))
+    
+    # Colors for each camera
+    colors = ['blue', 'red', 'green']
+    camera_names = ['Camera 1', 'Camera 2', 'Camera 3']
+    
+    # Plot each camera's edge differences
+    for cam_idx in range(min(3, len(edge_frame_differences))):
+        edge_diffs = edge_frame_differences[cam_idx][:min_frames]
+        plt.plot(frame_axis, edge_diffs, linewidth=1.5, alpha=0.8, 
+                color=colors[cam_idx], label=camera_names[cam_idx])
+    
+    # Styling
+    plt.title('Edge Differences by Frame - All Cameras', fontsize=16, pad=20)
+    plt.xlabel('Frame Number', fontsize=12)
+    plt.ylabel('Mean Edge Difference', fontsize=12)
+    plt.grid(True, alpha=0.3)
+    plt.legend(loc='upper right', fontsize=11)
+    
+    # Calculate and display statistics for all cameras
+    stats_text_lines = []
+    for cam_idx in range(min(3, len(edge_frame_differences))):
+        edge_diffs = edge_frame_differences[cam_idx][:min_frames]
+        if edge_diffs:
+            mean_val = np.mean(edge_diffs)
+            std_val = np.std(edge_diffs)
+            max_val = np.max(edge_diffs)
+            min_val = np.min(edge_diffs)
+            stats_text_lines.append(f'{camera_names[cam_idx]}:')
+            stats_text_lines.append(f'  Mean: {mean_val:.2f}')
+            stats_text_lines.append(f'  Std: {std_val:.2f}')
+            stats_text_lines.append(f'  Range: {min_val:.2f}-{max_val:.2f}')
+            if cam_idx < 2:  # Add empty line between cameras (except after last)
+                stats_text_lines.append('')
+    
+    # Add statistics text box
+    stats_text = '\n'.join(stats_text_lines)
+    plt.text(0.02, 0.98, stats_text, transform=plt.gca().transAxes, fontsize=9, 
+             verticalalignment='top', bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+    
+    # Set axis limits
+    if frame_axis.size > 0:
+        plt.xlim(0, max(frame_axis))
+        
+    # Find overall max for y-axis
+    all_values = []
+    for edge_diffs in edge_frame_differences[:3]:
+        all_values.extend(edge_diffs[:min_frames])
+    if all_values:
+        max_val = max(all_values)
+        plt.ylim(0, max_val * 1.1)
+    
+    # Save plot
+    plot_path = os.path.join(output_path, 'edge_differences_plot.png')
+    plt.tight_layout()
+    plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"  Edge differences plot saved: {plot_path}")
 
 
 def print_results(stats, video_files, freeze_candidates, detector, report_path, quality_metrics):

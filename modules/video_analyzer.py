@@ -35,16 +35,16 @@ class VideoAnalyzer:
         Returns:
             List of video file paths
         """
-        # Search for AVI and MP4 files
+        # Search for AVI, MP4, and MOV files
         video_files = []
-        supported_extensions = ('.avi', '.mp4')
+        supported_extensions = ('.avi', '.mp4', '.mov')
         
         for filename in os.listdir(self.input_path):
             if filename.lower().endswith(supported_extensions):
                 video_files.append(os.path.join(self.input_path, filename))
         
         if len(video_files) != 3:
-            raise ValueError(f"Found {len(video_files)} video files (AVI/MP4), expected exactly 3")
+            raise ValueError(f"Found {len(video_files)} video files (AVI/MP4/MOV), expected exactly 3")
         
         self.video_files = sorted(video_files)  # Sort for consistency
         
@@ -92,8 +92,11 @@ class VideoAnalyzer:
         Returns:
             Laplacian variance value (higher = sharper)
         """
+        # Extract face region first
+        face_region = self.extract_face_region(frame)
+        
         # Convert to grayscale
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(face_region, cv2.COLOR_BGR2GRAY)
         
         # Apply Laplacian filter
         laplacian = cv2.Laplacian(gray, cv2.CV_64F)
@@ -112,8 +115,11 @@ class VideoAnalyzer:
         Returns:
             Tenengrad variance value (higher = sharper)
         """
+        # Extract face region first
+        face_region = self.extract_face_region(frame)
+        
         # Convert to grayscale
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(face_region, cv2.COLOR_BGR2GRAY)
         
         # Apply Sobel filters
         sobel_x = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
@@ -126,15 +132,45 @@ class VideoAnalyzer:
         return float(np.var(gradient_magnitude))
 
 
+    def extract_face_region(self, frame: NDArray) -> NDArray:
+        """
+        Extract central face region from frame (20% width, 50% height)
+        
+        Args:
+            frame: Input frame (BGR)
+            
+        Returns:
+            Cropped frame focusing on face area
+        """
+        height, width = frame.shape[:2]
+        
+        # Calculate crop dimensions (20% width, 50% height)
+        crop_width = int(width * 0.20)
+        crop_height = int(height * 0.50)
+        
+        # Calculate center position
+        center_x = width // 2
+        center_y = height // 2
+        
+        # Calculate crop boundaries
+        x1 = max(0, center_x - crop_width // 2)
+        x2 = min(width, center_x + crop_width // 2)
+        y1 = max(0, center_y - crop_height // 2)
+        y2 = min(height, center_y + crop_height // 2)
+        
+        # Extract crop
+        return frame[y1:y2, x1:x2]
+
+
 
 
 
     def compute_image_quality_metrics(self) -> Dict[str, List[float]]:
         """
-        Compute average image quality metrics for all cameras
+        Compute average image quality metrics for all cameras using face region analysis
         
         Returns:
-            Dictionary with quality metrics for each camera
+            Dictionary with quality metrics for each camera (analyzed from central face area)
         """
         print("Computing image quality metrics...")
         
@@ -144,7 +180,7 @@ class VideoAnalyzer:
         }
         
         min_frames = min(self.frame_counts)
-        sample_frames = min(100, min_frames)  # Sample up to 100 frames for efficiency
+        sample_frames = min(20, min_frames)  # Sample up to 20 frames for efficiency
         frame_indices = np.linspace(0, min_frames - 1, sample_frames, dtype=int)
         
         for camera_idx in range(len(self.video_captures)):
