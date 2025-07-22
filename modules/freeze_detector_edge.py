@@ -201,12 +201,12 @@ class FreezeDetectorEdge:
         
         return freeze_candidates
     
-    def detect_freezes_for_visualization(self, visualization_percent: float) -> List[Dict[str, Any]]:
+    def detect_freezes_for_visualization(self, visualization_count: int) -> List[Dict[str, Any]]:
         """
-        Detect top N% most suspicious frames for visualization
+        Detect top N most suspicious frames for visualization
         
         Args:
-            visualization_percent: Percentage of most suspicious frames to return
+            visualization_count: Number of most suspicious frames to return
             
         Returns:
             List of freeze candidates sorted by suspicion level
@@ -215,8 +215,8 @@ class FreezeDetectorEdge:
         frame_indices_with_metrics = [(i, frame['frame_metric']) for i, frame in enumerate(self.frame_data)]
         frame_indices_with_metrics.sort(key=lambda x: x[1])
         
-        # Take top percentage as visualization candidates
-        num_candidates = max(1, int(len(frame_indices_with_metrics) * visualization_percent / 100))
+        # Take top N as visualization candidates
+        num_candidates = min(visualization_count, len(frame_indices_with_metrics))
         top_frame_indices = [frame_idx for frame_idx, metric in frame_indices_with_metrics[:num_candidates]]
         
         # Convert to format expected by visualizer

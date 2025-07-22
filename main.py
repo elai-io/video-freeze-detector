@@ -17,8 +17,8 @@ def main():
     parser.add_argument('--output', '-o', default='output', help='Output folder for results')
     parser.add_argument('--freeze-threshold', '-t', type=float, default=0.25,
                         help='Freeze detection threshold (default 0.25)')
-    parser.add_argument('--visualization-percent', '-p', type=float, default=5.0,
-                        help='Percentage of most suspicious frames to visualize (default 5.0%%)')
+    parser.add_argument('--visualization-count', '-p', type=int, default=5,
+                        help='Number of most suspicious frames to visualize (default 5)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
 
     
@@ -38,7 +38,7 @@ def main():
     print(f"Analyzing video files in folder: {args.input_path}")
     print(f"Results will be saved to: {output_path}")
     print(f"Freeze detection threshold: {args.freeze_threshold}")
-    print(f"Visualization percent: {args.visualization_percent}%")
+    print(f"Visualization count: {args.visualization_count} frames")
     print("-" * 70)
     
     try:
@@ -70,9 +70,9 @@ def main():
         detector = FreezeDetectorEdge(edge_frame_differences, 
                                     freeze_threshold=args.freeze_threshold)
         
-        # Get freeze candidates for visualization (top N% most suspicious)
-        freeze_candidates = detector.detect_freezes_for_visualization(args.visualization_percent)
-        print(f"Found {len(freeze_candidates)} frames for visualization (top {args.visualization_percent}%)")
+        # Get freeze candidates for visualization (top N most suspicious)
+        freeze_candidates = detector.detect_freezes_for_visualization(args.visualization_count)
+        print(f"Found {len(freeze_candidates)} frames for visualization (top {args.visualization_count} most suspicious)")
         
         # Stage 4: Save data to CSV/Excel
         print("Stage 4: Saving analysis data...")

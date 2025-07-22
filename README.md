@@ -1,6 +1,6 @@
 # Video Freeze Detection System
 
-[![Version](https://img.shields.io/badge/version-0.4.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.4.2-blue.svg)](CHANGELOG.md)
 
 A robust system for detecting video freezes in synchronized multi-camera recordings using edge-based frame difference analysis with comprehensive sequence detection.
 
@@ -27,7 +27,7 @@ python main.py path/to/videos
 #### Optional arguments:
 - `--output`, `-o` — Output folder for results (default: `output`)
 - `--freeze-threshold`, `-t` — Freeze detection threshold (default: 0.25)
-- `--visualization-percent`, `-p` — Percentage of most suspicious frames to visualize (default: 5.0%)
+- `--visualization-count`, `-p` — Number of most suspicious frames to visualize (default: 5)
 - `--verbose`, `-v` — Verbose output
 
 Examples:
@@ -35,8 +35,8 @@ Examples:
 # Standard analysis
 python main.py videos --freeze-threshold 0.25 --output results --verbose
 
-# Analyze top 10% most suspicious frames
-python main.py videos --visualization-percent 10.0 --output analysis
+# Analyze top 10 most suspicious frames
+python main.py videos --visualization-count 10 --output analysis
 ```
 
 ## 📁 Project Structure

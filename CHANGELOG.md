@@ -5,6 +5,14 @@ All notable changes to the Video Freeze Detection System will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2024-12-19
+
+### Changed
+- **Visualization parameter change**: Changed from percentage to count (--visualization-count instead of --visualization-percent)
+- **Default behavior**: Still defaults to 5 frames for visualization
+- **Function signature update**: Updated `detect_freezes_for_visualization()` to accept integer count instead of float percentage
+- **Documentation update**: Updated README.md examples and argument descriptions
+
 ## [0.4.1] - 2025-07-14
 
 ### Fixed
