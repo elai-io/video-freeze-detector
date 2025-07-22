@@ -263,8 +263,8 @@ def main():
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     
-    print(f"📹 VIDEO FRAME DIFFERENCE EXTRACTOR")
-    print(f"=" * 50)
+    print("📹 VIDEO FRAME DIFFERENCE EXTRACTOR")
+    print("=" * 50)
     print(f"Video file: {os.path.basename(args.video_file)}")
     print(f"Resolution: {width}x{height}")
     print(f"Original FPS: {original_fps:.2f}")
@@ -348,7 +348,7 @@ def main():
     
     # Сохраняем графики средних значений разностей
     if not args.no_plot and mean_diffs:
-        print(f"\n📈 Creating plots of frame differences...")
+        print("\n📈 Creating plots of frame differences...")
         video_filename = os.path.basename(args.video_file)
         save_plots(mean_diffs, edge_diffs, original_fps, args.output_dir, video_filename)
         
@@ -358,7 +358,7 @@ def main():
         max_val = np.max(mean_diffs)
         min_val = np.min(mean_diffs)
         
-        print(f"📊 Frame Difference Statistics:")
+        print("📊 Frame Difference Statistics:")
         print(f"   Mean: {mean_val:.3f}")
         print(f"   Std:  {std_val:.3f}")
         print(f"   Min:  {min_val:.3f}")
@@ -371,7 +371,7 @@ def main():
             edge_max_val = np.max(edge_diffs)
             edge_min_val = np.min(edge_diffs)
             
-            print(f"📊 Edge Difference Statistics:")
+            print("📊 Edge Difference Statistics:")
             print(f"   Mean: {edge_mean_val:.3f}")
             print(f"   Std:  {edge_std_val:.3f}")
             print(f"   Min:  {edge_min_val:.3f}")

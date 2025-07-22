@@ -84,7 +84,7 @@ def create_video_from_images(image_dir: str, output_video_path: str, fps: int) -
         ]
         
         print(f"Creating video with command: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        subprocess.run(cmd, capture_output=True, text=True, check=True)
         print("Video created successfully!")
         return True
         
@@ -167,7 +167,7 @@ def main():
     
     # Создаем видео из изображений
     output_video_path = os.path.join(args.output_dir, "diffs_video.mp4")
-    print(f"Creating video from images...")
+    print("Creating video from images...")
     if create_video_from_images(args.output_dir, output_video_path, args.fps):
         print(f"Video saved to: {output_video_path}")
     else:

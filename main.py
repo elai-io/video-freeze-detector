@@ -17,8 +17,8 @@ def main():
     parser.add_argument('--output', '-o', default='output', help='Output folder for results')
     parser.add_argument('--freeze-threshold', '-t', type=float, default=0.25,
                         help='Freeze detection threshold (default 0.25)')
-    parser.add_argument('--visualization-count', '-p', type=int, default=5,
-                        help='Number of most suspicious frames to visualize (default 5)')
+    parser.add_argument('--visualization-count', '-p', type=int, default=3,
+                        help='Number of most suspicious frames to visualize (default 3)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
 
     
@@ -33,8 +33,8 @@ def main():
     output_path = args.output
     os.makedirs(output_path, exist_ok=True)
     
-    print(f"🎬 VIDEO FREEZE DETECTOR WITH COMPREHENSIVE ANALYSIS")
-    print(f"=" * 70)
+    print("🎬 VIDEO FREEZE DETECTOR WITH COMPREHENSIVE ANALYSIS")
+    print("=" * 70)
     print(f"Analyzing video files in folder: {args.input_path}")
     print(f"Results will be saved to: {output_path}")
     print(f"Freeze detection threshold: {args.freeze_threshold}")
@@ -225,22 +225,15 @@ def print_results(stats, video_files, freeze_candidates, detector, report_path, 
         print(f"\nTop {len(camera_sequences)} Longest Freeze Sequences by Camera:")
         print("-" * 80)
         for i, seq in enumerate(camera_sequences, 1):
-            severity_icon = {
-                'CRITICAL': '🔴',
-                'HIGH': '🟠', 
-                'MEDIUM': '🟡',
-                'LOW': '🟢'
-            }.get(seq['severity'], '⚪')
-            
             print(f"  {i:2d}. Camera {seq['camera']} | "
                   f"Frames {seq['start_frame']:3d}-{seq['end_frame']:3d} | "
                   f"Length: {seq['length']:2d} | "
                   f"Avg metric: {seq['avg_metric']:6.4f}")
     else:
-        print(f"\nNo freeze sequences of length 2+ found.")
+        print("\nNo freeze sequences of length 2+ found.")
     
     # Camera analysis
-    print(f"\nCamera Analysis:")
+    print("\nCamera Analysis:")
     for i, file_path in enumerate(video_files):
         camera_stat = detector.camera_statistics[i]
         freeze_count = camera_stat['freeze_count']
@@ -260,7 +253,7 @@ def print_results(stats, video_files, freeze_candidates, detector, report_path, 
         print(f"  Camera {i+1}: {freeze_count} freezes ({freeze_pct:.2f}%) of {total_frames} frames | {severity}")
     
     # Image quality analysis
-    print(f"\nImage Quality Analysis:")
+    print("\nImage Quality Analysis:")
     for i, file_path in enumerate(video_files):
         laplacian = quality_metrics['laplacian_variance'][i]
         tenengrad = quality_metrics['tenengrad_variance'][i]
@@ -271,7 +264,6 @@ def print_results(stats, video_files, freeze_candidates, detector, report_path, 
     
     # Overall metrics
     setup_metrics = stats['setup_metrics']
-    quality_score = setup_metrics['overall_quality_score']
     overall_freeze_rate = setup_metrics['overall_freeze_rate_percent']
     critical_sequences = setup_metrics['critical_sequences']
     
@@ -289,7 +281,7 @@ def print_results(stats, video_files, freeze_candidates, detector, report_path, 
     frame_based_suspicious = sum(1 for frame in detector.frame_data if frame['frame_freeze'] == 1)
     frame_based_percentage = (frame_based_suspicious / detector.min_frames) * 100
     
-    print(f"\n" + "=" * 70)
+    print("\n" + "=" * 70)
     print("FINAL SUMMARY")
     print("=" * 70)
     print(f"📊 TOTAL FREEZE INSTANCES: {total_freeze_stats['total_freezes']} ({overall_freeze_rate:.2f}%)")
@@ -297,7 +289,7 @@ def print_results(stats, video_files, freeze_candidates, detector, report_path, 
     print(f"⚠️  CRITICAL PATTERNS: {critical_sequences} sequences (2+ frames)")
     print(f"🎯 QUALITY RATING: {quality_rating}")
     print(f"📁 IMAGES GENERATED: {len(freeze_candidates)} sets")
-    print(f"📄 DATA SAVED: CSV, Excel, and JSON reports")
+    print("📄 DATA SAVED: CSV, Excel, and JSON reports")
     print("=" * 70)
 
 

@@ -292,8 +292,8 @@ def main():
         print("Supported formats: AVI, MP4, MOV, MKV")
         return 1
     
-    print(f"📹 VIDEO QUALITY ANALYZER")
-    print(f"=" * 100)
+    print("📹 VIDEO QUALITY ANALYZER")
+    print("=" * 100)
     print(f"Directory: {args.input_dir}")
     print(f"Found {len(video_files)} video files")
     print(f"Analysis mode: {mode_description}")

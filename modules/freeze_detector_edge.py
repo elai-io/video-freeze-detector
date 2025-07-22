@@ -378,7 +378,6 @@ class FreezeDetectorEdge:
             seq['sequence_percentage'] = (seq['length'] / self.min_frames) * 100
             
             # Get total suspicious frames for this camera
-            cam_idx = seq['camera'] - 1  # Convert to 0-based
             total_suspicious_frames = sum(1 for frame in self.frame_data 
                                         if frame[f'cam{seq["camera"]}_freeze'] == 1)
             seq['camera_total_suspicious'] = total_suspicious_frames

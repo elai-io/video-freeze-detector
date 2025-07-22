@@ -38,7 +38,7 @@ class VisualizerEdge:
             self.font_large = ImageFont.truetype("arial.ttf", 36)
             self.font_medium = ImageFont.truetype("arial.ttf", 28)
             self.font_small = ImageFont.truetype("arial.ttf", 20)
-        except:
+        except (OSError, IOError):
             # If system font not found, use default
             self.font_large = ImageFont.load_default()
             self.font_medium = ImageFont.load_default()
@@ -291,7 +291,7 @@ class VisualizerEdge:
                 continue
         
         print(f"Freeze images saved to: {self.save_path}")
-        print(f"Each freeze has 3 files: _1 (previous), _2 (current), _3 (edge difference)")
+        print("Each freeze has 3 files: _1 (previous), _2 (current), _3 (edge difference)")
     
     def create_summary_image(self, freeze_candidates: List[Dict[str, Any]], 
                            top_count: int = 5) -> str:
