@@ -53,6 +53,7 @@ VideoFreezeDetector/
 │   └── README.md               # Module documentation
 ├── scripts/                    # Additional analysis scripts
 │   ├── metrics_analyzer.py     # Detailed metrics analysis
+│   ├── head_pose_three_views.py # Yaw estimation using SixDRepNet
 │   └── README.md               # Scripts documentation
 ├── videos/                     # Input video files (example)
 ├── output/                     # Analysis results and visualizations
@@ -201,3 +202,34 @@ FINAL SUMMARY
 ---
 
 **This system provides accurate, comprehensive analysis of video freeze events with detailed reporting and visualization capabilities.** 
+
+# 🎯 Head Pose Analysis (Three Views)
+
+This standalone utility leverages [SixDRepNet](https://github.com/thohemp/6DRepNet) to estimate **yaw** angles from three synchronised camera views (left, front, right).
+
+```
+python scripts/head_pose_three_views.py \
+  --left  path/to/left_view.mp4 \
+  --front path/to/front_view.mp4 \
+  --right path/to/right_view.mp4
+```
+
+Output example:
+
+```
+HEAD POSE ANALYSIS (6DRepNet)
+====================================================================================================
+left:  43.1 ± 2.7
+front:  0.3 ± 1.5
+right: 30.2 ± 2.1
+✅ Done
+```
+
+Arguments:
+
+* `--sample-frames N` – Limit processing to *N* evenly-spaced frames (default **0** = use all)
+* `--verbose`         – Show per-frame progress bars
+
+Internally the script computes a 95 % confidence interval around the mean yaw value using a normal-approximation (z = 1.96) and prints the result in the concise `mean ± margin` form.
+
+> NOTE: SixDRepNet weights are downloaded automatically on first run. 
