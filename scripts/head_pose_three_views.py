@@ -18,7 +18,7 @@ def analyze_head_pose(
     model: 'SixDRepNet',
     sample_frames: Union[int, None] = None,
     verbose: bool = False,
-) -> Tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+) -> NDArray[np.float64]:
     """Analyze head pose angles for the given video.
 
     Args:
@@ -28,8 +28,7 @@ def analyze_head_pose(
         verbose: If ``True`` prints progress for each processed frame.
 
     Returns:
-        Tuple containing three numpy arrays ``(yaw, pitch, roll)`` measured for the
-        processed frames (in degrees).
+        Array containing yaw predictions for the processed frames (in degrees).
     """
     if not os.path.exists(video_path):
         raise FileNotFoundError(f'Video not found: {video_path}')
@@ -51,8 +50,6 @@ def analyze_head_pose(
         frame_indices = set(range(0, total_frames, step))
 
     yaw_list: List[float] = []
-    pitch_list: List[float] = []
-    roll_list: List[float] = []
 
     frame_id = 0
     progress_bar = tqdm(total=sample_frames if sample_frames else total_frames, disable=not verbose)
@@ -66,12 +63,10 @@ def analyze_head_pose(
             frame_id += 1
             continue
 
-        # SixDRepNet expects BGR uint8 image (OpenCV default)
-        pitch, yaw, roll = model.predict(frame)
+        # SixDRepNet returns pitch, yaw, roll
+        _pitch, yaw, _roll = model.predict(frame)
 
         yaw_list.append(float(yaw))
-        pitch_list.append(float(pitch))
-        roll_list.append(float(roll))
 
         frame_id += 1
         if progress_bar is not None:
@@ -85,14 +80,7 @@ def analyze_head_pose(
     if progress_bar is not None:
         progress_bar.close()
 
-    return np.array(yaw_list, dtype=np.float64), np.array(pitch_list, dtype=np.float64), np.array(roll_list, dtype=np.float64)
-
-
-def summarise_angles(angles: NDArray[np.float64]) -> Tuple[float, float, float]:
-    """Return mean, std and range (max-min) for given angle series."""
-    if angles.size == 0:
-        return 0.0, 0.0, 0.0
-    return float(np.mean(angles)), float(np.std(angles)), float(np.ptp(angles))
+    return np.array(yaw_list, dtype=np.float64)
 
 
 def compute_mean_ci(angles: NDArray[np.float64], confidence: float = 0.95) -> Tuple[float, float, float]:
@@ -116,13 +104,6 @@ def compute_mean_ci(angles: NDArray[np.float64], confidence: float = 0.95) -> Tu
     return mean_val, mean_val - margin, mean_val + margin
 
 
-def print_yaw_summary(label: str, yaw: NDArray[np.float64]) -> None:
-    """Print concise yaw mean ± 95 CI margin for the specified view."""
-    mean_val, ci_lower, ci_upper = compute_mean_ci(yaw)
-    margin = mean_val - ci_lower
-    print(f"{label.lower()}: {mean_val:.1f} ± {margin:.1f}")
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(
         description='Analyze head pose angles for three camera views (left, front, right) using SixDRepNet'
@@ -130,7 +111,7 @@ def main() -> int:
     parser.add_argument('--left', required=True, help='Path to the left-view video')
     parser.add_argument('--front', required=True, help='Path to the frontal-view video')
     parser.add_argument('--right', required=True, help='Path to the right-view video')
-    parser.add_argument('--sample-frames', type=int, default=0, help='Number of frames to sample from each video (default: 150, use 0 for all)')
+    parser.add_argument('--sample-frames', type=int, default=0, help='Number of frames to sample from each video (0 = all frames)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose output')
 
     args = parser.parse_args()
@@ -145,10 +126,28 @@ def main() -> int:
 
     print('\nProcessing videos…')
 
-    for label, path in [('LEFT', args.left), ('FRONT', args.front), ('RIGHT', args.right)]:
-        yaw, pitch, roll = analyze_head_pose(path, model, sample_frames, args.verbose)
-        print_yaw_summary(label, yaw)
+    # Process cameras separately
+    yaw_left = analyze_head_pose(args.left, model, sample_frames, args.verbose)
+    yaw_front = analyze_head_pose(args.front, model, sample_frames, args.verbose)
+    yaw_right = analyze_head_pose(args.right, model, sample_frames, args.verbose)
 
+    # Align lengths
+    n = min(yaw_left.size, yaw_front.size, yaw_right.size)
+    yaw_left, yaw_front, yaw_right = yaw_left[:n], yaw_front[:n], yaw_right[:n]
+
+    # Compute camera offsets: delta = front - cam
+    delta_left = yaw_front - yaw_left
+    delta_right = yaw_front - yaw_right
+
+    mean_left, ci_left_low, ci_left_up = compute_mean_ci(delta_left)
+    mean_right, ci_right_low, ci_right_up = compute_mean_ci(delta_right)
+
+    margin_left = mean_left - ci_left_low
+    margin_right = mean_right - ci_right_low
+
+    print('\nEstimated camera yaw offsets (relative to frontal):')
+    print(f"left: {abs(mean_left):.1f} ± {margin_left:.1f} degrees")
+    print(f"right: {abs(mean_right):.1f} ± {margin_right:.1f} degrees")
     print('✅ Done')
     return 0
 
