@@ -39,7 +39,7 @@ class VisualizerJerk:
             self.font_large = ImageFont.truetype("arial.ttf", 36)
             self.font_medium = ImageFont.truetype("arial.ttf", 28)
             self.font_small = ImageFont.truetype("arial.ttf", 20)
-        except:
+        except (OSError, IOError):
             # If system font not found, use default
             self.font_large = ImageFont.load_default()
             self.font_medium = ImageFont.load_default()
@@ -186,7 +186,7 @@ class VisualizerJerk:
         draw.text((10, 105), jerk_text, fill=(255, 255, 0), font=self.font_small)
         
         # Detection method
-        strategy_text = f"Detection: 3rd derivative (jerk) - max value"
+        strategy_text = "Detection: 3rd derivative (jerk) - max value"
         draw.text((10, 130), strategy_text, fill=(255, 255, 0), font=self.font_small)
         
         # Additional metrics
@@ -284,7 +284,7 @@ class VisualizerJerk:
                 continue
         
         print(f"Freeze images saved to: {self.save_path}")
-        print(f"Each freeze has 3 files: _1 (previous), _2 (current), _3 (difference)")
+        print("Each freeze has 3 files: _1 (previous), _2 (current), _3 (difference)")
     
     def create_summary_image(self, freeze_candidates: List[Dict[str, Any]], 
                            top_count: int = 5) -> str:
