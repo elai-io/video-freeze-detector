@@ -2,6 +2,47 @@
 
 This folder contains extra scripts for advanced analysis, metrics evaluation, and visualization. These are not required for basic freeze detection, but provide powerful tools for research and diagnostics.
 
+## 🖼️ `combine_video_frames.py`
+
+**Purpose:**
+- Combines first frames from 3-camera video sets into single composite images
+- Processes folders containing exactly 3 MOV files each
+- Applies center cropping, crosshair markers, and reference lines to each frame
+- Useful for visual alignment verification and camera synchronization checks
+
+**Usage:**
+```bash
+py scripts/combine_video_frames.py "path/to/video/folders" --output results
+```
+
+**Arguments:**
+- `input_dir` — Path to directory containing video folders (each with 3 MOV files)
+- `--output` — Output directory (default: results)
+- `--crop-fraction` — Fraction of width for center crop (default: 0.5)
+- `--line-position` — Position of bottom line as fraction from bottom (default: 0.15)
+- `--verbose`, `-v` — Verbose output with processing details
+
+**Usage Examples:**
+```bash
+# Basic usage
+py scripts/combine_video_frames.py "C:\Users\user\Downloads\3-cams"
+
+# Custom output directory
+py scripts/combine_video_frames.py "C:\Users\user\Downloads\3-cams" --output custom_results
+
+# Adjust cropping and line position
+py scripts/combine_video_frames.py "C:\Users\user\Downloads\3-cams" --crop-fraction 0.6 --line-position 0.2 --verbose
+```
+
+**What it does:**
+1. Searches for folders containing exactly 3 MOV files
+2. Extracts the first frame from each video
+3. Crops 50% of the center width from each frame
+4. Adds a red crosshair (+) in the center of each frame
+5. Adds a blue reference line at 15% from the bottom
+6. Combines the 3 processed frames horizontally into one image
+7. Saves as PNG with the folder name (e.g., "1 скороговорка.png")
+
 ## 📹 `video_quality_analyzer.py`
 
 **Purpose:**

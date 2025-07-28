@@ -7,12 +7,12 @@ from typing import List
 from PIL import Image, ImageDraw, ImageFont
 from tqdm import tqdm
 
-CONTRAST_FACTOR = 2.0  # Усиление контраста
-CROP_FRACTION = 1/3    # Центральная треть по ширине
+CONTRAST_FACTOR = 2.0  # Contrast enhancement
+CROP_FRACTION = 1/3    # Central third of width
 FONT_SIZE = 32
-FPS = 5  # Частота кадров для выходного видео
+FPS = 5  # Frame rate for output video
 
-# Попробуем найти шрифт для PIL
+# Try to find font for PIL
 try:
     FONT = ImageFont.truetype("arial.ttf", FONT_SIZE)
 except Exception:
@@ -49,15 +49,15 @@ def central_crop(img: np.ndarray, fraction: float = 1/3) -> np.ndarray:
 
 def save_diff_image(diff: np.ndarray, frame_idx: int, mean_diffs: List[float], out_path: str):
     """Save difference image with annotations."""
-    # frame_idx здесь - это номер кадра, для которого вычисляется разность
-    # Усиливаем контраст
+    # frame_idx here is the frame number for which the difference is calculated
+    # Enhance contrast
     diff_vis = np.clip(diff * CONTRAST_FACTOR, 0, 255).astype(np.uint8)
-    # Переводим в RGB если нужно
+    # Convert to RGB if needed
     if diff_vis.ndim == 2:
         diff_vis = cv2.cvtColor(diff_vis, cv2.COLOR_GRAY2RGB)
     elif diff_vis.shape[2] == 1:
         diff_vis = cv2.cvtColor(diff_vis, cv2.COLOR_GRAY2RGB)
-    # PIL для текста
+    # PIL for text
     img_pil = Image.fromarray(diff_vis)
     draw = ImageDraw.Draw(img_pil)
     text = f"Frame: {frame_idx}\nMean diff: {['{:.2f}'.format(m) for m in mean_diffs]}"
@@ -68,18 +68,19 @@ def save_diff_image(diff: np.ndarray, frame_idx: int, mean_diffs: List[float], o
 def create_video_from_images(image_dir: str, output_video_path: str, fps: int) -> bool:
     """Create video from sequence of images using ffmpeg."""
     try:
-        # Формируем паттерн для поиска изображений
+        # Form pattern for finding images
         image_pattern = os.path.join(image_dir, "diff_%04d.png")
         
-        # Команда ffmpeg для создания видео
+        # ffmpeg command for creating video with filter for even dimensions
         cmd = [
             'ffmpeg',
-            '-y',  # Перезаписать выходной файл если существует
+            '-y',  # Overwrite output file if exists
             '-framerate', str(fps),
             '-i', image_pattern,
+            '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',  # Ensure even dimensions
             '-c:v', 'libx264',
             '-pix_fmt', 'yuv420p',
-            '-crf', '23',  # Качество сжатия
+            '-crf', '23',  # Compression quality
             output_video_path
         ]
         
@@ -98,13 +99,13 @@ def create_video_from_images(image_dir: str, output_video_path: str, fps: int) -
 
 
 def main():
-    # Парсим аргументы командной строки
+    # Parse command line arguments
     args = parse_arguments()
     
-    # Создаем выходную директорию
+    # Create output directory
     os.makedirs(args.output_dir, exist_ok=True)
     
-    # Получаем список видео файлов
+    # Get list of video files
     video_files = get_video_files(args.input_dir)
     if not video_files:
         print(f"No video files found in {args.input_dir}")
@@ -112,19 +113,19 @@ def main():
     
     print(f"Found {len(video_files)} video files.")
     
-    # Определяем общее количество кадров
+    # Determine total number of frames
     caps = [cv2.VideoCapture(f) for f in video_files]
     total_frames = min(int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) for cap in caps)
     print(f"Total frames to process: {total_frames}")
     
-    # Сбрасываем позицию всех капчур
+    # Reset position of all captures
     for cap in caps:
         cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
     
-    frame_idx = 0  # Начинаем с 0
+    frame_idx = 0  # Start from 0
     prev_frames = []
     
-    # Создаем прогресс-бар
+    # Create progress bar
     pbar = tqdm(total=total_frames-1, desc="Processing frames", unit="frame")
     
     while frame_idx < total_frames:
@@ -139,18 +140,18 @@ def main():
         if frames is None or len(frames) != len(caps):
             break
         
-        # BGR -> Gray для диффа
+        # BGR -> Gray for difference calculation
         frames_gray = [cv2.cvtColor(f, cv2.COLOR_BGR2GRAY) for f in frames]
         
         if prev_frames:
             diffs = [cv2.absdiff(frames_gray[i], prev_frames[i]) for i in range(len(frames_gray))]
-            # Кроп центральной трети
+            # Crop central third
             diffs_cropped = [central_crop(d, args.crop_fraction) for d in diffs]
-            # Усреднение для вывода
+            # Average for output
             mean_diffs = [float(np.mean(d)) for d in diffs_cropped]
-            # Объединяем по ширине
+            # Concatenate horizontally
             diff_concat = np.concatenate(diffs_cropped, axis=1)
-            # diff[0] соответствует кадру 1 (разность между кадрами 0 и 1)
+            # diff[0] corresponds to frame 1 (difference between frames 0 and 1)
             diff_frame_idx = frame_idx
             out_path = os.path.join(args.output_dir, f'diff_{diff_frame_idx:04d}.png')
             save_diff_image(diff_concat, diff_frame_idx, mean_diffs, out_path)
@@ -165,7 +166,7 @@ def main():
     
     print(f"Done! Saved diffs to {args.output_dir}")
     
-    # Создаем видео из изображений
+    # Create video from images
     output_video_path = os.path.join(args.output_dir, "diffs_video.mp4")
     print("Creating video from images...")
     if create_video_from_images(args.output_dir, output_video_path, args.fps):

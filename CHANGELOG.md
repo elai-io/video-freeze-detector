@@ -5,6 +5,34 @@ All notable changes to the Video Freeze Detection System will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5] - 2025-07-28
+
+### Added
+- **Enhanced video frame combination script** (`scripts/combine_video_frames.py`):
+  - **Multi-format support**: Now supports MOV, AVI, MP4, MKV, WMV, FLV, WEBM formats
+  - **Automatic video folder detection**: Finds folders with exactly 3 video files
+  - **Center crop processing**: Extracts 50% center portion of each video frame
+  - **Crosshair overlay**: Adds red crosshair in center of each processed frame
+  - **Bottom line indicator**: Adds blue horizontal line at 15% from bottom
+  - **Horizontal combination**: Combines 3 processed frames into single image
+  - **Batch processing**: Processes multiple video folders automatically
+  - **Configurable parameters**: Crop fraction and line position customization
+- **Head pose analysis script** (`scripts/head_pose_three_views.py`):
+  - **Multi-view head pose estimation**: Analyzes head pose from three camera angles
+  - **3D head pose detection**: Uses computer vision for head orientation analysis
+  - **Cross-camera consistency**: Validates head pose across different viewpoints
+  - **Pose visualization**: Visual representation of head orientation
+  - **Statistical analysis**: Comprehensive pose statistics and reporting
+
+### Changed
+- **Improved video format compatibility**: Extended support beyond MOV files to include common video formats
+- **Enhanced folder processing**: More robust detection of video file combinations
+- **Better error handling**: Improved handling of unsupported video formats and corrupted files
+
+### Fixed
+- **Video format detection**: Fixed case sensitivity issues in file extension matching
+- **Path handling**: Improved cross-platform compatibility for file path operations
+
 ## [0.4.2] - 2025-07-22
 
 ### Changed
