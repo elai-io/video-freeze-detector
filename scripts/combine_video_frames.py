@@ -215,9 +215,21 @@ def calculate_optimal_grid(num_images: int, img_width: int, img_height: int) -> 
     return cols, rows
 
 
-def create_collage(images_data: List[Tuple[Image.Image, str]], output_path: str, 
-                  scale_factor: float = 1.0, verbose: bool = False) -> None:
-    """Create a large collage from all images with labels."""
+def create_collage(
+    images_data: List[Tuple[Image.Image, str]],
+    output_path: str,
+    scale_factor: float = 1.0,
+    verbose: bool = False,
+    cols_override: Optional[int] = None,
+    draw_separators: bool = True,
+    separator_width: int = 2,
+    separator_color: str = 'gray',
+) -> None:
+    """Create a collage from images with labels.
+
+    - cols_override: if provided, fixes number of columns; otherwise auto layout
+    - draw_separators: draw vertical lines between columns across the collage
+    """
     if not images_data:
         print("No images to create collage")
         return
@@ -231,8 +243,12 @@ def create_collage(images_data: List[Tuple[Image.Image, str]], output_path: str,
         img_width = int(img_width * scale_factor)
         img_height = int(img_height * scale_factor)
     
-    # Calculate optimal grid
-    cols, rows = calculate_optimal_grid(len(images_data), img_width, img_height)
+    # Calculate grid
+    if cols_override is not None and cols_override > 0:
+        cols = cols_override
+        rows = math.ceil(len(images_data) / cols)
+    else:
+        cols, rows = calculate_optimal_grid(len(images_data), img_width, img_height)
     
     if verbose:
         print(f"Creating collage with {cols}×{rows} grid")
@@ -297,6 +313,17 @@ def create_collage(images_data: List[Tuple[Image.Image, str]], output_path: str,
             # Draw main text
             draw.text((text_x, text_y), label, font=font, fill=text_color)
     
+    # Optional separators between columns
+    if draw_separators and cols > 1:
+        draw = ImageDraw.Draw(collage)
+        for c in range(1, cols):
+            x = c * img_width
+            # Draw a vertical rectangle as separator
+            draw.rectangle(
+                [x - max(1, separator_width // 2), 0, x + (separator_width // 2), collage_height - 1],
+                fill=separator_color,
+            )
+
     # Save collage
     if verbose:
         print(f"Saving collage: {collage_width}×{collage_height} pixels")
@@ -398,36 +425,29 @@ def main():
     
     print(f"Processing complete. Results saved to: {output_dir}")
     
-    # Create collages (by default both are created unless --no-collage is specified)
+    # Create collages (now: only resized collages, default 6 columns, half-8K width)
     if not args.no_collage and all_images:
         print(f"\nCreating collages from {len(all_images)} images...")
-        
-        # Determine which collages to create
-        create_full = args.create_collage or not args.no_collage  # Default to True
-        create_8k = args.collage_8k or not args.no_collage       # Default to True
-        
-        if create_full:
-            collage_path = os.path.join(output_dir, "collage_full.jpg")
-            print("Creating full resolution collage...")
-            create_collage(all_images, collage_path, scale_factor=1.0, verbose=args.verbose)
-        
-        if create_8k:
-            # Calculate scale factor for 8K version (fixed 12 columns)
-            if all_images:
-                first_img = all_images[0][0]
-                original_img_width = first_img.width
-                
-                # Fixed grid: 12 columns
-                cols = 12
-                rows = math.ceil(len(all_images) / cols)
-                
-                # Calculate scale factor to fit 8K width (7680 pixels)
-                target_width = 7680  # 8K width
-                scale_factor = target_width / (cols * original_img_width)
-                
-                collage_8k_path = os.path.join(output_dir, "collage_8k.jpg")
-                print(f"Creating 8K collage with {cols}×{rows} grid (scale factor: {scale_factor:.3f})...")
-                create_collage(all_images, collage_8k_path, scale_factor=scale_factor, verbose=args.verbose)
+
+        # Target: 6 columns, target width = 7680/2 = 3840
+        first_img = all_images[0][0]
+        original_img_width = first_img.width
+        cols = 6
+        rows = math.ceil(len(all_images) / cols)
+        target_width = 3840
+        scale_factor = target_width / (cols * original_img_width)
+
+        # Output path: in output_base with input_name and 'коллаж'
+        collage_name = f"{input_name}_коллаж.jpg"
+        collage_path = os.path.join(output_base, collage_name)
+        print(f"Creating resized collage {cols}×{rows} to width {target_width} px (scale {scale_factor:.3f})...")
+        create_collage(
+            all_images,
+            collage_path,
+            scale_factor=scale_factor,
+            verbose=args.verbose,
+            cols_override=cols,
+        )
     elif not args.no_collage:
         print("No images available for collage creation. Ensure per-triplet PNGs exist.")
 
