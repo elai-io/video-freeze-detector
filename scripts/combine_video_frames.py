@@ -362,11 +362,10 @@ def main():
     for folder_path, label in tqdm(video_folders, desc="Processing video folders"):
         # Process the folder
         combined_image = process_video_triplet(
-            folder_path, 
-            args.crop_fraction, 
-            args.line_position, 
+            folder_path,
+            args.crop_fraction,
+            args.line_position,
             args.frame_index,
-            args.verbose
         )
         
         if combined_image is not None:
