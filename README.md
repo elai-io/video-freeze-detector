@@ -1,6 +1,6 @@
 # Video Freeze Detection System
 
-[![Version](https://img.shields.io/badge/version-0.5-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.5.1-blue.svg)](CHANGELOG.md)
 
 A robust system for detecting video freezes in synchronized multi-camera recordings using edge-based frame difference analysis with comprehensive sequence detection.
 
@@ -52,9 +52,10 @@ VideoFreezeDetector/
 │   ├── visualizer_edge.py      # Visualization and image creation
 │   └── README.md               # Module documentation
 ├── scripts/                    # Additional analysis scripts
-│   ├── metrics_analyzer.py     # Detailed metrics analysis
-│   ├── head_pose_three_views.py # Yaw estimation using SixDRepNet
-│   └── README.md               # Scripts documentation
+│   ├── metrics_analyzer.py      # Detailed metrics analysis
+│   ├── combine_video_frames.py  # Combine frames (front/left/right), overlays, collages (full + 8K)
+│   ├── head_pose_three_views.py # Head pose analysis from three views
+│   └── README.md                # Scripts documentation
 ├── videos/                     # Input video files (example)
 ├── output/                     # Analysis results and visualizations
 └── docs/                       # Additional documentation
@@ -203,7 +204,24 @@ FINAL SUMMARY
 
 **This system provides accurate, comprehensive analysis of video freeze events with detailed reporting and visualization capabilities.** 
 
-# 🎯 Head Pose Analysis (Three Views)
+# 🎯 Additional Analysis Scripts
+
+## Video Frame Combination (`scripts/combine_video_frames.py`)
+
+Combine frames from strict three-view sets into single images with overlays and build collages.
+
+```
+py scripts/combine_video_frames.py path/to/ID_folder --output results --frame-index 100 --verbose
+```
+
+Features:
+- Strict structure: `front/`, `left/`, `right/` under each ID
+- Triplet matching by unique suffix (e.g., `angry_high_001`)
+- Center crop (default 40% of width), measurement scale, top/bottom lines
+- Per-triplet PNGs named after the `front` file stem
+- Collages: `collage_full.jpg` and `collage_8k.jpg` (12 columns, exact 8K width)
+
+## Head Pose Analysis (Three Views)
 
 This standalone utility leverages [SixDRepNet](https://github.com/thohemp/6DRepNet) to estimate **yaw** angles from three synchronised camera views (left, front, right).
 

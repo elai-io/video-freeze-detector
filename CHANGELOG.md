@@ -1,3 +1,13 @@
+## [0.5.1] - 2025-09-19
+
+### Added
+- `scripts/combine_video_frames.py`:
+  - Strict folder structure support per ID: `front/`, `left/`, `right/`
+  - Triplet matching by unique filename suffix (e.g., `angry_high_001`)
+  - Frame selection via `--frame-index` (choose non-first frames)
+  - Updated overlays: measurement scale (±300px, ticks every 50px), top/bottom reference lines
+  - Collage generation improvements: fixed 12 columns, exact 8K width scaling, labeled tiles
+
 # Changelog
 
 All notable changes to the Video Freeze Detection System will be documented in this file.
