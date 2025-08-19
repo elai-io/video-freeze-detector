@@ -437,8 +437,8 @@ def main():
         target_width = 3840
         scale_factor = target_width / (cols * original_img_width)
 
-        # Output path: in output_base with input_name and 'коллаж'
-        collage_name = f"{input_name}_коллаж.jpg"
+        # Output path: in output_base with input_name and 'collage'
+        collage_name = f"{input_name}_collage.jpg"
         collage_path = os.path.join(output_base, collage_name)
         print(f"Creating resized collage {cols}×{rows} to width {target_width} px (scale {scale_factor:.3f})...")
         create_collage(
