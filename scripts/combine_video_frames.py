@@ -360,7 +360,22 @@ def main():
     
     # Process each folder
     for folder_path, label in tqdm(video_folders, desc="Processing video folders"):
-        # Process the folder
+        output_filename = f"{label}.png"
+        output_path = os.path.join(output_dir, output_filename)
+
+        # If output already exists, skip processing and load for collage
+        if os.path.exists(output_path):
+            if args.verbose:
+                print(f"Skipping existing: {output_path}")
+            if not args.no_collage:
+                try:
+                    existing_img = Image.open(output_path).convert('RGB')
+                    all_images.append((existing_img, label))
+                except Exception as exc:
+                    print(f"Warning: could not open existing image '{output_path}': {exc}")
+            continue
+
+        # Process the folder normally
         combined_image = process_video_triplet(
             folder_path,
             args.crop_fraction,
@@ -370,8 +385,6 @@ def main():
         
         if combined_image is not None:
             # Save the combined image
-            output_filename = f"{label}.png"
-            output_path = os.path.join(output_dir, output_filename)
             combined_image.save(output_path)
             
             # Store for collage (by default both are enabled unless --no-collage is specified)
@@ -415,6 +428,8 @@ def main():
                 collage_8k_path = os.path.join(output_dir, "collage_8k.jpg")
                 print(f"Creating 8K collage with {cols}×{rows} grid (scale factor: {scale_factor:.3f})...")
                 create_collage(all_images, collage_8k_path, scale_factor=scale_factor, verbose=args.verbose)
+    elif not args.no_collage:
+        print("No images available for collage creation. Ensure per-triplet PNGs exist.")
 
 
 if __name__ == "__main__":
