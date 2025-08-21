@@ -1,4 +1,24 @@
-## [0.5.1] - 2025-09-19
+# Changelog
+
+All notable changes to the Video Freeze Detection System will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.5.2] - 2025-08-21
+
+### Added
+- `scripts/concat_emotions_videos.py`:
+  - Emotion video concatenation with fixed order: Angry, Sad, Happy, Surprised, Confident, Confused, Disgust
+  - Random selection: one "normal" and one "high" strength clip per emotion
+  - Text overlay with ID, emotion name, and strength in top-left corner
+  - Automatic ID detection from path (e.g., "ID_9" from "/fsx/dataset/unidata/ID_9/front")
+  - 720p downscaling for speed optimization
+  - Progress tracking with tqdm for transcoding, concatenation, and cleanup
+  - Audio preservation and detection with detailed logging
+  - Optimized encoding: H.264 fast preset, CRF 20, 60 fps, AAC 96k
+
+## [0.5.1] - 2025-08-19
 
 ### Added
 - `scripts/combine_video_frames.py`:
@@ -7,13 +27,6 @@
   - Frame selection via `--frame-index` (choose non-first frames)
   - Updated overlays: measurement scale (±300px, ticks every 50px), top/bottom reference lines
   - Collage generation improvements: fixed 12 columns, exact 8K width scaling, labeled tiles
-
-# Changelog
-
-All notable changes to the Video Freeze Detection System will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.5] - 2025-07-28
 

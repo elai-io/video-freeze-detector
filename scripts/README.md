@@ -2,6 +2,59 @@
 
 This folder contains extra scripts for advanced analysis, metrics evaluation, and visualization. These are not required for basic freeze detection, but provide powerful tools for research and diagnostics.
 
+## 🎬 `concat_emotions_videos.py`
+
+**Purpose:**
+- Concatenates emotion videos in a fixed order with text overlays
+- Selects random clips for each emotion (one "normal", one "high" strength)
+- Automatically detects subject ID from path and generates output filename
+- Optimized for speed with 720p downscaling and fast encoding
+
+**File structure expected:**
+```
+ID_9/
+  front/M001_<view>_angry_high_001.mov
+  front/M001_<view>_angry_normal_002.mov
+  front/M001_<view>_sad_high_003.mov
+  front/M001_<view>_sad_normal_004.mov
+  ...
+```
+Pattern: `<ID>_<view>_<emotion>_<strength>_<index>.mov`
+
+**Usage:**
+```bash
+python3 scripts/concat_emotions_videos.py /fsx/dataset/unidata/ID_9/front --output-dir results/emotions_concat
+```
+
+**Arguments:**
+- `input_dir` — Path to directory containing emotion video files
+- `--output-dir` — Output directory (default: results/emotions_concat)
+- `--seed` — Random seed for reproducible selection
+
+**What it does:**
+1. Detects subject ID from path (e.g., "ID_9" from "/fsx/dataset/unidata/ID_9/front")
+2. Selects clips in order: Angry, Sad, Happy, Surprised, Confident, Confused, Disgust
+3. For each emotion: picks one random "normal" and one random "high" strength clip
+4. Transcodes each clip: 720p downscale, text overlay, H.264 fast preset, CRF 20, 60 fps
+5. Overlays text: "{ID} - {Emotion} ({strength})" in top-left corner
+6. Concatenates all segments into final video: `{ID}_emotions_concat.mp4`
+7. Preserves audio and logs detection status
+
+**Output:**
+- `results/emotions_concat/ID_9_emotions_concat.mp4` — Final concatenated video
+- Progress tracking: transcoding segments, concatenation, cleanup
+- Audio detection logs for each segment and final output
+
+**Features:**
+- **Fixed emotion order**: Ensures consistent sequence across different subjects
+- **Random selection**: Different clips each run (use `--seed` for reproducibility)
+- **Speed optimized**: 720p downscaling, fast preset, efficient encoding
+- **Audio preservation**: Maintains original audio with AAC 96k encoding
+- **Progress feedback**: tqdm progress bars for all operations
+- **Flexible input**: Works with any view type (frontal, left, right, etc.)
+
+---
+
 ## 🖼️ `combine_video_frames.py`
 
 **Purpose:**
@@ -289,6 +342,7 @@ py scripts/save_central_diffs.py
 
 ```
 scripts/
+├── concat_emotions_videos.py    # Emotion video concatenation
 ├── video_quality_analyzer.py    # Video file quality analysis
 ├── metrics_analyzer.py          # Metrics analysis
 ├── save_frame_diffs.py          # Advanced frame difference analysis
