@@ -405,9 +405,10 @@ def process_and_concatenate_triplet(left_info: VideoInfo,
                                     fps: float = 25.0) -> bool:
     """Process and concatenate a video triplet into a single side-by-side video.
     
-    Scales each video to 854x480 (480p 16:9) and concatenates them horizontally
-    to create a 2562x480 output video. Includes aligned audio from the first 
-    available source in priority order: frontal > left > right.
+    Crops each video to center 60% by width (preserving full height), then scales
+    to consistent width (854px) while preserving aspect ratio and concatenates them 
+    horizontally. Output width will be 2562px (854*3), height varies based on aspect ratio.
+    Includes aligned audio from the first available source in priority order: frontal > left > right.
     
     Args:
         left_info: Left camera video info
@@ -434,17 +435,26 @@ def process_and_concatenate_triplet(left_info: VideoInfo,
         frontal_input = ffmpeg.input(frontal_info.local_path, ss=frontal_trim, t=duration)
         right_input = ffmpeg.input(right_info.local_path, ss=right_trim, t=duration)
         
-        # Scale videos to 480p 16:9 (854x480) for each view
-        # Final concatenated video will be 2562x480 (854*3 x 480)
+        # Scale videos to consistent width (854px) while preserving aspect ratio
+        # Final concatenated video will be 2562px wide (854*3), height varies by aspect ratio
         target_width = 854
         target_height = 480
         
-        left_scaled = ffmpeg.filter(left_input, 'scale', target_width, target_height)
-        frontal_scaled = ffmpeg.filter(frontal_input, 'scale', target_width, target_height)
-        right_scaled = ffmpeg.filter(right_input, 'scale', target_width, target_height)
+        # Create cropped versions (center 60% crop by width only, preserving full height)
+        # crop filter: crop=out_w:out_h:x:y where x,y is the top-left corner
+        # Width-only center crop: width=iw*0.6, height=ih (full), x=(iw-iw*0.6)/2, y=0
+        left_cropped = ffmpeg.filter(left_input, 'crop', 'iw*0.6', 'ih', '(iw-iw*0.6)/2', '0')
+        frontal_cropped = ffmpeg.filter(frontal_input, 'crop', 'iw*0.6', 'ih', '(iw-iw*0.6)/2', '0')
+        right_cropped = ffmpeg.filter(right_input, 'crop', 'iw*0.6', 'ih', '(iw-iw*0.6)/2', '0')
         
-        # Concatenate horizontally (side by side)
-        concatenated_video = ffmpeg.filter([left_scaled, frontal_scaled, right_scaled], 'hstack', inputs=3)
+        # Scale cropped videos to consistent width while preserving aspect ratio
+        # Use -1 for height to automatically calculate based on aspect ratio
+        left_cropped_scaled = ffmpeg.filter(left_cropped, 'scale', target_width, -1)
+        frontal_cropped_scaled = ffmpeg.filter(frontal_cropped, 'scale', target_width, -1)
+        right_cropped_scaled = ffmpeg.filter(right_cropped, 'scale', target_width, -1)
+        
+        # Concatenate horizontally (side by side) - cropped views
+        concatenated_video = ffmpeg.filter([left_cropped_scaled, frontal_cropped_scaled, right_cropped_scaled], 'hstack', inputs=3)
 
         # Add filename overlay at the top
         filename = f'{left_info.metadata.sex}{left_info.metadata.individual_id}_{left_info.metadata.emotion}_{left_info.metadata.emotion_level}_{left_info.metadata.text_id}'
